@@ -19,9 +19,17 @@ def index():
     create_database(db_config)
     wait_time_data = WaitTimeLib(db_config)
     mean_waits = wait_time_data.get_mean_wait_times()
-    best_loket = min(mean_waits, key=lambda x: x[2]) if mean_waits else None
+    current_waiting = wait_time_data.get_current_waiting()
+    
+    # Combine mean_waits and current_waiting data
+    combined_data = []
+    for mw in mean_waits:
+        current = next((cw for cw in current_waiting if cw[0] == mw[0]), (None, None, 0))
+        combined_data.append((*mw, current[2]))
+    
+    best_loket = min(combined_data, key=lambda x: x[2]) if combined_data else None
     wait_time_data.close()
-    return render_template('index.html', mean_waits=mean_waits, best_loket=best_loket)
+    return render_template('index.html', loket_data=combined_data, best_loket=best_loket)
 
 @app.route('/mean_wait_times', methods=['GET'])
 def mean_wait_times():

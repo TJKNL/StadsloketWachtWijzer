@@ -119,6 +119,19 @@ class WaitTimeLib:
             """, (loket_id, name.strip()))
         self.db.commit()
 
+    def get_current_waiting(self):
+        self.cursor.execute("""
+            SELECT wt.stadsloket_id, ln.loket_name, wt.waiting
+            FROM wait_times wt
+            LEFT JOIN loket_names ln ON wt.stadsloket_id = ln.stadsloket_id
+            WHERE wt.timestamp = (
+                SELECT MAX(timestamp)
+                FROM wait_times
+                WHERE stadsloket_id = wt.stadsloket_id
+            )
+        """)
+        return [(sid, name or 'Unknown', waiting) for sid, name, waiting in self.cursor.fetchall()]
+
     def close(self):
         self.cursor.close()
         self.db.close()

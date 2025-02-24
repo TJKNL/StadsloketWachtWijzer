@@ -50,6 +50,16 @@ body {
     line-height: 1.5;
 }
 
+.bento p i {
+    width: 20px;
+    margin-right: 8px;
+    color: var(--amsterdam-red);
+}
+
+.best-loket {
+    border: 2px solid var(--amsterdam-red) !important;
+}
+
 .hero {
     background: linear-gradient(135deg, var(--amsterdam-red) 0%, #ff4b52 100%);
     padding: 6rem 2rem;
