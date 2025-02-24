@@ -1,0 +1,92 @@
+:root {
+    --amsterdam-red: #E32E35;
+    --dark-gray: #222222;
+    --light-gray: #f8f9fa;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+body {
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+}
+
+.bento {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+.bento > div {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.bento > div:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.bento h2, .bento h3 {
+    color: var(--amsterdam-red);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.bento p {
+    color: #666;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+.hero {
+    background: linear-gradient(135deg, var(--amsterdam-red) 0%, #ff4b52 100%);
+    padding: 6rem 2rem;
+    color: white;
+    box-shadow: 0 4px 20px rgba(227, 46, 53, 0.2);
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+}
+
+.hero p {
+    font-size: 1.4rem;
+    font-weight: 300;
+    opacity: 0.9;
+}
+
+.footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--dark-gray);
+    color: white;
+    margin-top: 4rem;
+}
+
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+    .hero p {
+        font-size: 1.2rem;
+    }
+    .bento {
+        grid-template-columns: 1fr;
+    }
+}

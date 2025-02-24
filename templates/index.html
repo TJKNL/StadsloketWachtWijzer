@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Amsterdam Stadsloket Wait Times</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="hero">
+        <h1>Stadsloket Wait Times</h1>
+        <p>Real-time insights for Amsterdam city services</p>
+    </header>
+
+    {% if best_loket %}
+    <div class="bento">
+        <div>
+            <h2><i class="fas fa-star"></i> Recommended Location</h2>
+            <p><i class="fas fa-building"></i> {{ best_loket[1] }}</p>
+            <p><i class="fas fa-clock"></i> {{ best_loket[2] }} minutes</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="bento">
+        {% for loket in mean_waits %}
+        <div>
+            <h3><i class="fas fa-building"></i> {{ loket[1] }}</h3>
+            <p><i class="fas fa-clock"></i> Average wait: {{ loket[2] }} minutes</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <footer class="footer">
+        <p>© 2023 Amsterdam Stadsloket Data | Real-time waiting information</p>
+    </footer>
+</body>
+</html>
