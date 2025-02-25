@@ -2,6 +2,7 @@ import requests
 import mysql.connector
 import re
 from datetime import datetime
+import pytz
 
 def create_database(db_config):
     # Connect without specifying a database
@@ -20,6 +21,7 @@ class WaitTimeLib:
         self.db_config = db_config
         self.db = mysql.connector.connect(**db_config)
         self.cursor = self.db.cursor()
+        self.timezone = pytz.timezone('Europe/Amsterdam')
         self.create_table()
         
     def create_table(self):
@@ -65,10 +67,12 @@ class WaitTimeLib:
     def store_data(self, data):
         for entry in data:
             parsed_waittime = self.parse_waittime(entry['waittime'])
+            # Get current time in Amsterdam timezone
+            current_time = datetime.now(self.timezone)
             self.cursor.execute("""
             INSERT INTO wait_times (stadsloket_id, waiting, waittime, timestamp)
             VALUES (%s, %s, %s, %s)
-            """, (entry['id'], entry['waiting'], parsed_waittime, datetime.now()))
+            """, (entry['id'], entry['waiting'], parsed_waittime, current_time))
         self.db.commit()
 
     def get_mean_wait_times(self):

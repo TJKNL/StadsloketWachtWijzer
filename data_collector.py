@@ -2,15 +2,19 @@ import schedule
 import time
 import logging
 from datetime import datetime
+import pytz
 from wait_time_data import WaitTimeLib, create_database
 from dotenv import load_dotenv
 import os
 from contextlib import contextmanager
 
-# Configure logging
+# Configure logging with timezone
+amsterdam_tz = pytz.timezone('Europe/Amsterdam')
+logging.Formatter.converter = lambda *args: datetime.now(amsterdam_tz).timetuple()
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S %Z',
     handlers=[
         logging.FileHandler('data_collector.log'),
         logging.StreamHandler()
