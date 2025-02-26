@@ -171,6 +171,15 @@ class WaitTimeLib:
             'datasets': list(results.values())
         }
 
+    def get_last_update_time(self):
+        """Get the timestamp of the most recent data update"""
+        self.cursor.execute("""
+            SELECT MAX(timestamp)
+            FROM wait_times
+        """)
+        result = self.cursor.fetchone()
+        return result[0] if result and result[0] else None
+
     def close(self):
         self.cursor.close()
         self.db.close()

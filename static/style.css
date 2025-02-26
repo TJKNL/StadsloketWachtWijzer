@@ -111,6 +111,27 @@ body {
     margin-top: 4rem;
 }
 
+.data-status {
+    text-align: center;
+    margin: 0 auto;
+    padding: 8px;
+    max-width: 1200px;
+    color: #555;
+    font-size: 0.9rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.data-status p {
+    margin: 0;
+}
+
+.data-status i {
+    margin-right: 5px;
+    color: #4a6fa5;
+}
+
 @media (max-width: 768px) {
     .hero h1 {
         font-size: 2.5rem;

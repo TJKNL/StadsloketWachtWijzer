@@ -13,6 +13,15 @@
         <p>Real-time insights for Amsterdam city services</p>
     </header>
 
+    <!-- Add the last updated information below the header -->
+    <div class="data-status">
+        {% if last_update %}
+        <p><i class="fas fa-sync-alt"></i> Data last updated: {{ last_update.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        {% else %}
+        <p><i class="fas fa-exclamation-triangle"></i> Update time information unavailable</p>
+        {% endif %}
+    </div>
+
     {% if best_loket %}
     <div class="bento">
         <div class="best-loket">
