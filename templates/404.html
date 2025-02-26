@@ -1,30 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
-    <title>Page Not Found</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-        }
-        h1 {
-            color: #333;
-        }
-        .error-code {
-            font-size: 72px;
-            color: #e74c3c;
-            margin-bottom: 20px;
-        }
-        a {
-            color: #3498db;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina Niet Gevonden | Stadsloket Wachttijden</title>
+    <meta name="robots" content="noindex, follow">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="error-code">404</div>
-    <h1>Page Not Found</h1>
-    <p>The page you're looking for doesn't exist or has been moved.</p>
-    <p><a href="/">Return to the homepage</a></p>
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Pagina Niet Gevonden</h1>
+            <p>De opgevraagde pagina bestaat niet</p>
+        </div>
+    </header>
+
+    <div class="bento">
+        <div>
+            <h2><i class="fas fa-exclamation-triangle"></i> 404 Fout</h2>
+            <p>De pagina die u zoekt bestaat niet of is verplaatst.</p>
+            <p>Ga terug naar <a href="{{ url_for('index') }}">de homepage</a> om actuele wachttijden te bekijken.</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time waiting information stadsloketten Amsterdam</p>
+    </footer>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, current_app, request
+from flask import Flask, jsonify, render_template, current_app, request, send_from_directory, redirect, url_for
 from wait_time_data import WaitTimeLib, create_database
 from dotenv import load_dotenv
 import os
@@ -27,7 +27,7 @@ db_config = {
 
 def create_app():
     """Application factory pattern"""
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static', static_url_path='/static')
     
     # Config settings
     app.config.update(
@@ -84,9 +84,21 @@ def create_app():
         logger.error(f"Server error: {e}")
         return render_template('500.html'), 500
     
+    # SEO - Serve sitemap and robots.txt
+    @app.route('/sitemap.xml')
+    def sitemap():
+        return send_from_directory(app.root_path, 'sitemap.xml')
+
+    @app.route('/robots.txt')
+    def robots():
+        return send_from_directory(app.root_path, 'robots.txt')
+    
     # Routes
     @app.route('/', methods=['GET'])
     def index():
+        # Get language from query parameter or default to Dutch
+        lang = request.args.get('lang', 'nl')
+        
         try:
             with get_db() as wait_time_data:
                 mean_waits = wait_time_data.get_mean_wait_times()
@@ -101,11 +113,23 @@ def create_app():
                 
                 best_loket = min(combined_data, key=lambda x: x[2]) if combined_data else None
                 
+                # Get base URL for canonical link
+                host = request.host_url.rstrip('/')
+                canonical_url = f"{host}{request.path}"
+                
+                # Add alternate language links
+                lang_urls = {
+                    'nl': f"{host}{request.path}?lang=nl",
+                    'en': f"{host}{request.path}?lang=en"
+                }
+                
             return render_template('index.html', 
                                   loket_data=combined_data, 
                                   best_loket=best_loket,
                                   last_update=last_update,
-                                  canonical_url=request.url)
+                                  canonical_url=canonical_url,
+                                  lang=lang,
+                                  lang_urls=lang_urls)
         except Exception as e:
             logger.error(f"Error in index route: {e}")
             return render_template('index.html', 
@@ -113,7 +137,8 @@ def create_app():
                                   best_loket=None, 
                                   last_update=None,
                                   error="Unable to fetch data",
-                                  canonical_url=request.url)
+                                  canonical_url=request.url,
+                                  lang=lang)
 
     @app.route('/mean_wait_times', methods=['GET'])
     def mean_wait_times():

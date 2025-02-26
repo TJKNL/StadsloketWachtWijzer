@@ -161,6 +161,70 @@ body {
     color: #4a6fa5;
 }
 
+/* New SEO-friendly styles */
+.breadcrumbs {
+    padding: 0.5rem 2rem;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumbs ol {
+    list-style: none;
+    display: flex;
+}
+
+.breadcrumbs a {
+    color: var(--amsterdam-red);
+    text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+.language-switcher {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.language-switcher a {
+    color: white;
+    text-decoration: none;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.language-switcher a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.language-switcher a.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.footer-nav {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.footer-nav a {
+    color: white;
+    text-decoration: none;
+}
+
+.footer-nav a:hover {
+    text-decoration: underline;
+}
+
+/* Accessibility improvements */
+a:focus, button:focus {
+    outline: 2px solid var(--amsterdam-red);
+    outline-offset: 2px;
+}
+
 @media (max-width: 768px) {
     .hero h1 {
         font-size: 2.5rem;

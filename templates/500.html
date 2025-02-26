@@ -1,7 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
-    <title>Server Error</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Fout | Stadsloket Wachttijden</title>
+    <meta name="robots" content="noindex, follow">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,9 +27,23 @@
     </style>
 </head>
 <body>
-    <div class="error-code">500</div>
-    <h1>Server Error</h1>
-    <p>Something went wrong on our end. We're working to fix the issue.</p>
-    <p><a href="/">Try again</a></p>
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Server Fout</h1>
+            <p>Er is iets misgegaan</p>
+        </div>
+    </header>
+
+    <div class="bento">
+        <div>
+            <h2><i class="fas fa-exclamation-circle"></i> 500 Fout</h2>
+            <p>Er is een probleem opgetreden bij het verwerken van uw verzoek.</p>
+            <p>Probeer het later nog eens of ga terug naar <a href="{{ url_for('index') }}">de homepage</a>.</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time waiting information stadsloketten Amsterdam</p>
+    </footer>
 </body>
 </html>
