@@ -16,8 +16,7 @@ logging.basicConfig(
     format='%(asctime)s [%(levelname)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S %Z',
     handlers=[
-        logging.FileHandler('data_collector.log'),
-        logging.StreamHandler()
+        logging.StreamHandler()  # Only use stream handler in production
     ]
 )
 logger = logging.getLogger(__name__)
@@ -25,19 +24,15 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-db_config = {
-    'host': os.getenv('DB_HOST'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'database': os.getenv('DB_NAME')
-}
+# Get database URL from environment variable
+db_url = os.environ.get('DATABASE_URL')
 
 @contextmanager
 def wait_time_session():
     """Context manager for handling database connections safely"""
     wait_time = None
     try:
-        wait_time = WaitTimeLib(db_config)
+        wait_time = WaitTimeLib(db_url)
         yield wait_time
     except Exception as e:
         logger.error(f"Database connection error: {e}")
@@ -70,7 +65,7 @@ def main():
     
     # Ensure database exists
     try:
-        create_database(db_config)
+        create_database(db_url)
     except Exception as e:
         logger.error(f"Failed to create database: {e}")
         return
