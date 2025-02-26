@@ -92,20 +92,20 @@ body {
 
 .hero-image {
     position: absolute;
-    bottom: 0;
+    bottom: -5px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1;
     width: 100%;
     max-width: 700px;
-    opacity: 0.2;
     pointer-events: none;
+    filter: brightness(0) invert(1); /* This will make the image white */
 }
 
 .hero-image img {
     width: 100%;
     height: auto;
-    max-height: 300px;
+    max-height: 100px;
     object-fit: contain;
     object-position: bottom;
 }
