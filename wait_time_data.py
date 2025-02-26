@@ -136,6 +136,41 @@ class WaitTimeLib:
         """)
         return [(sid, name or 'Unknown', waiting) for sid, name, waiting in self.cursor.fetchall()]
 
+    def get_hourly_averages(self):
+        """Get average wait times in minutes by hour of day for each stadsloket"""
+        self.cursor.execute("""
+            SELECT 
+                wt.stadsloket_id,
+                ln.loket_name,
+                HOUR(wt.timestamp) as hour_of_day,
+                AVG(wt.waittime) as avg_waittime
+            FROM wait_times wt
+            LEFT JOIN loket_names ln ON wt.stadsloket_id = ln.stadsloket_id
+            WHERE HOUR(wt.timestamp) BETWEEN 8 AND 18
+            GROUP BY wt.stadsloket_id, ln.loket_name, HOUR(wt.timestamp)
+            ORDER BY wt.stadsloket_id, HOUR(wt.timestamp)
+        """)
+        
+        results = {}
+        hours = list(range(8, 19))  # 8:00 to 18:00
+        
+        for stadsloket_id, loket_name, hour, avg_waittime in self.cursor.fetchall():
+            if loket_name not in results:
+                results[loket_name or f'Unknown-{stadsloket_id}'] = {
+                    'label': loket_name or f'Unknown-{stadsloket_id}',
+                    'data': [0] * len(hours)
+                }
+            try:
+                hour_index = hours.index(hour)
+                results[loket_name or f'Unknown-{stadsloket_id}']['data'][hour_index] = round(float(avg_waittime or 0), 1)
+            except (ValueError, IndexError):
+                pass
+                
+        return {
+            'labels': [f"{h}:00" for h in hours],
+            'datasets': list(results.values())
+        }
+
     def close(self):
         self.cursor.close()
         self.db.close()

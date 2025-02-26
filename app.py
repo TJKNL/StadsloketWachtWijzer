@@ -39,5 +39,13 @@ def mean_wait_times():
     wait_time_data.close()
     return jsonify(mean_wait)
 
+@app.route('/hourly_data', methods=['GET'])
+def hourly_data():
+    create_database(db_config)
+    wait_time_data = WaitTimeLib(db_config)
+    data = wait_time_data.get_hourly_averages()
+    wait_time_data.close()
+    return jsonify(data)
+
 if __name__ == '__main__':
     app.run(debug=True)

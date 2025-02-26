@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 </head>
 <body>
     <header class="hero">
@@ -32,6 +33,70 @@
         </div>
         {% endfor %}
     </div>
+    
+    <!-- Daily Seasonality Chart Section -->
+    <div class="chart-container">
+        <h2>Daily Wait Time Patterns</h2>
+        <p>Average wait times in minutes throughout the day (8:00-18:00)</p>
+        <canvas id="seasonalityChart"></canvas>
+    </div>
+    
+    <script>
+        // Fetch hourly data and create chart
+        fetch('/hourly_data')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('seasonalityChart').getContext('2d');
+                
+                // Generate unique colors for each dataset
+                data.datasets.forEach((dataset, index) => {
+                    const hue = (index * 137) % 360; // Golden angle approximation for color distribution
+                    dataset.borderColor = `hsl(${hue}, 70%, 45%)`;
+                    dataset.backgroundColor = `hsl(${hue}, 70%, 85%, 0.2)`;
+                    dataset.tension = 0.3;
+                    dataset.pointRadius = 3;
+                    dataset.pointHoverRadius = 5;
+                });
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Average wait time (minutes)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time of day'
+                                }
+                            }
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error loading chart data:', error));
+    </script>
 
     <footer class="footer">
         <p>© 2023 Amsterdam Stadsloket Data | Real-time waiting information</p>

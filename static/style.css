@@ -81,6 +81,28 @@ body {
     opacity: 0.9;
 }
 
+.chart-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 1200px;
+}
+
+.chart-container h2 {
+    color: var(--amsterdam-red);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.chart-container p {
+    color: #666;
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
 .footer {
     text-align: center;
     padding: 3rem 2rem;
