@@ -62,7 +62,7 @@ body {
 
 .hero {
     background: linear-gradient(135deg, var(--amsterdam-red) 0%, #ff4b52 100%);
-    padding: 6rem 2rem;
+    padding: 2rem 2rem 6rem 2rem;
     color: white;
     box-shadow: 0 4px 20px rgba(227, 46, 53, 0.2);
     text-align: center;
