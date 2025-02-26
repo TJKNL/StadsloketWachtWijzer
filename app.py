@@ -104,14 +104,16 @@ def create_app():
             return render_template('index.html', 
                                   loket_data=combined_data, 
                                   best_loket=best_loket,
-                                  last_update=last_update)
+                                  last_update=last_update,
+                                  canonical_url=request.url)
         except Exception as e:
             logger.error(f"Error in index route: {e}")
             return render_template('index.html', 
                                   loket_data=[], 
                                   best_loket=None, 
                                   last_update=None,
-                                  error="Unable to fetch data")
+                                  error="Unable to fetch data",
+                                  canonical_url=request.url)
 
     @app.route('/mean_wait_times', methods=['GET'])
     def mean_wait_times():

@@ -1,12 +1,63 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Amsterdam Stadsloket Wait Times</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-</head>
+    <head>
+        <!-- Primary Meta Tags -->
+        <meta charset="UTF-8">
+        <title>Amsterdam Stadsloket Wait Times | Real-time Queue Information</title>
+        <meta name="description" content="Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en plan uw bezoek efficiënt.">
+        <meta name="keywords" content="Amsterdam stadsloket, wachttijden Amsterdam, gemeente Amsterdam wachtrij, loket wachttijd, stadsdeel wachttijden, gemeentelijke diensten Amsterdam">
+        <meta name="author" content="Twan Kerkhof">
+        
+        <!-- Viewport and Favicon -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ request.url }}">
+        <meta property="og:title" content="Amsterdam Stadsloket Wachttijden | Actuele Informatie">
+        <meta property="og:description" content="Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en plan uw bezoek efficiënt.">
+        <meta property="og:image" content="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png', _external=True) }}">
+        
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="{{ request.url }}">
+        <meta property="twitter:title" content="Amsterdam Stadsloket Wachttijden | Actuele Informatie">
+        <meta property="twitter:description" content="Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en plan uw bezoek efficiënt.">
+        <meta property="twitter:image" content="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png', _external=True) }}">
+        
+        <!-- Structured Data -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Amsterdam Stadsloket Wachttijden",
+          "description": "Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam",
+          "url": "{{ request.url_root }}",
+          "applicationCategory": "UtilityApplication",
+          "operatingSystem": "All",
+          "offers": {
+            "@type": "Offer",
+            "price": "0"
+          }
+        }
+        </script>
+        
+        <!-- Preconnect to CDNs -->
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+        <link rel="preconnect" href="https://cdn.jsdelivr.net">
+        
+        <!-- Stylesheets -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js" defer></script>
+        
+        <!-- Cache control -->
+        <meta http-equiv="Cache-Control" content="max-age=1800">
+    </head>
 <body>
     <header class="hero">
         <div class="hero-content">
