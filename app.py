@@ -92,6 +92,12 @@ def create_app():
     @app.route('/robots.txt')
     def robots():
         return send_from_directory(app.root_path, 'robots.txt')
+        
+    # Privacy policy page
+    @app.route('/privacy', methods=['GET'])
+    def privacy():
+        lang = request.args.get('lang', 'nl')
+        return render_template('privacy.html', lang=lang)
     
     # Routes
     @app.route('/', methods=['GET'])

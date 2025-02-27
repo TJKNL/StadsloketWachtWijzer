@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <!-- Google tag (gtag.js) - Same implementation as on index page -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XECBEDSBR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      
+      const hasConsent = document.cookie.split(';').some(c => c.trim().startsWith('analytics_consent='));
+      if(hasConsent) {
+        gtag('config', 'G-4XECBEDSBR');
+      } else {
+        gtag('config', 'G-4XECBEDSBR', { 'analytics_storage': 'denied' });
+      }
+    </script>
+    
+    <!-- Primary Meta Tags -->
+    <meta charset="UTF-8">
+    <title>Privacybeleid | Amsterdam Stadsloket Wachttijden</title>
+    <meta name="description" content="Ons privacybeleid beschrijft hoe wij omgaan met uw gegevens bij het gebruik van de Amsterdam Stadsloket Wachttijden service.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Privacybeleid</h1>
+            <p>Amsterdam Stadsloket Wachttijden</p>
+        </div>
+    </header>
+
+    <div class="content-container">
+        <article class="privacy-policy">
+            <h2>Privacybeleid</h2>
+            <p class="last-updated">Laatst bijgewerkt: 1 oktober 2023</p>
+            
+            <section>
+                <h3>1. Inleiding</h3>
+                <p>Welkom bij het privacybeleid van Amsterdam Stadsloket Wachttijden ("wij", "ons", of "onze").</p>
+                <p>Wij respecteren uw privacy en zetten ons in om uw persoonlijke gegevens te beschermen. Dit privacybeleid legt uit hoe wij omgaan met uw gegevens wanneer u onze website bezoekt.</p>
+            </section>
+            
+            <section>
+                <h3>2. Welke gegevens wij verzamelen</h3>
+                <p>Wij verzamelen geen persoonlijk identificeerbare informatie tijdens uw bezoek aan onze website.</p>
+                <p>We gebruiken echter wel Google Analytics om geanonimiseerde gebruiksgegevens te verzamelen:</p>
+                <ul>
+                    <li>Browsertype en -versie</li>
+                    <li>Geanonimiseerde IP-adressen</li>
+                    <li>Bezochte pagina's en klikgedrag</li>
+                    <li>Tijd en duur van het bezoek</li>
+                    <li>Verwijzingsbronnen</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h3>3. Cookies</h3>
+                <p>Wij maken gebruik van functionele cookies die noodzakelijk zijn voor het functioneren van de website. Daarnaast gebruiken we analytische cookies (Google Analytics) om inzicht te krijgen in het gebruik van onze website.</p>
+                <p>U kunt ervoor kiezen om cookies te weigeren via onze cookie-banner of door de instellingen van uw browser aan te passen.</p>
+            </section>
+            
+            <section>
+                <h3>4. Google Analytics</h3>
+                <p>Deze website maakt gebruik van Google Analytics, een webanalyseservice van Google Inc. ("Google").</p>
+                <p>Google Analytics maakt gebruik van cookies om de website te helpen analyseren hoe gebruikers de site gebruiken. De door het cookie gegenereerde informatie over uw gebruik van de website wordt overgebracht naar en door Google opgeslagen op servers in de Verenigde Staten.</p>
+                <p>Wij hebben de volgende maatregelen genomen om uw privacy te beschermen:</p>
+                <ul>
+                    <li>We hebben een verwerkersovereenkomst met Google gesloten</li>
+                    <li>We hebben het delen van gegevens met Google uitgezet</li>
+                    <li>We maken geen gebruik van andere Google-diensten in combinatie met Google Analytics-cookies</li>
+                    <li>We hebben IP-anonimisering geactiveerd</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h3>5. Uw rechten</h3>
+                <p>Onder de Algemene Verordening Gegevensbescherming (AVG) heeft u verschillende rechten met betrekking tot uw gegevens:</p>
+                <ul>
+                    <li>Recht op inzage</li>
+                    <li>Recht op rectificatie</li>
+                    <li>Recht op vergetelheid</li>
+                    <li>Recht op beperking van de verwerking</li>
+                    <li>Recht op overdraagbaarheid van gegevens</li>
+                    <li>Recht van bezwaar</li>
+                </ul>
+                <p>Aangezien wij geen persoonlijk identificeerbare informatie verzamelen, zijn deze rechten echter beperkt toepasbaar.</p>
+            </section>
+            
+            <section>
+                <h3>6. Contact</h3>
+                <p>Voor vragen over dit privacybeleid kunt u contact opnemen via:</p>
+                <p>E-mail: privacy@twankerkhof.nl</p>
+            </section>
+        </article>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time waiting information stadsloketten Amsterdam</p>
+        <nav class="footer-nav">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('privacy') }}">Privacybeleid</a>
+        </nav>
+    </footer>
+
+    <!-- Cookie Consent Banner - Redesigned as a bento box -->
+    <div id="cookie-consent" class="cookie-bento">
+        <h3><i class="fas fa-cookie-bite"></i> Cookie Toestemming</h3>
+        <p>We gebruiken cookies voor analyse en een betere ervaring.</p>
+        <div class="cookie-buttons">
+            <button id="cookie-accept" class="cookie-btn accept">Accepteren</button>
+            <button id="cookie-decline" class="cookie-btn decline">Weigeren</button>
+        </div>
+        <a href="{{ url_for('privacy') }}" class="cookie-policy-link">Meer info</a>
+    </div>
+
+    <script>
+        // Cookie consent functionality - Same implementation as on index page
+        document.addEventListener('DOMContentLoaded', function() {
+            const cookieBanner = document.getElementById('cookie-consent');
+            const acceptBtn = document.getElementById('cookie-accept');
+            const declineBtn = document.getElementById('cookie-decline');
+            
+            const hasConsent = document.cookie.split(';').some(c => c.trim().startsWith('analytics_consent='));
+            
+            if (hasConsent) {
+                cookieBanner.style.display = 'none';
+            }
+            
+            acceptBtn.addEventListener('click', function() {
+                document.cookie = 'analytics_consent=true; max-age=' + (86400 * 365) + '; path=/; SameSite=Lax';
+                cookieBanner.style.display = 'none';
+                
+                gtag('consent', 'update', {
+                    'analytics_storage': 'granted'
+                });
+                gtag('config', 'G-4XECBEDSBR', { 'send_page_view': true });
+            });
+            
+            declineBtn.addEventListener('click', function() {
+                document.cookie = 'analytics_consent=false; max-age=' + (86400 * 365) + '; path=/; SameSite=Lax';
+                cookieBanner.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

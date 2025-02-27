@@ -225,6 +225,143 @@ a:focus, button:focus {
     outline-offset: 2px;
 }
 
+/* Privacy Policy Styles */
+.content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.privacy-policy {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.privacy-policy h2 {
+    color: var(--amsterdam-red);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.privacy-policy .last-updated {
+    color: #666;
+    font-style: italic;
+    margin-bottom: 2rem;
+}
+
+.privacy-policy section {
+    margin-bottom: 2rem;
+}
+
+.privacy-policy h3 {
+    color: var(--amsterdam-red);
+    margin-bottom: 1rem;
+}
+
+.privacy-policy p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.privacy-policy ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.privacy-policy ul li {
+    margin-bottom: 0.5rem;
+}
+
+/* Cookie Consent Banner - Bento Style */
+.cookie-bento {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    max-width: 320px;
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    text-align: center;
+}
+
+.cookie-bento h3 {
+    color: var(--amsterdam-red);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.cookie-bento p {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.cookie-bento i {
+    margin-right: 5px;
+}
+
+.cookie-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.cookie-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.cookie-btn.accept {
+    background-color: var(--amsterdam-red);
+    color: white;
+}
+
+.cookie-btn.accept:hover {
+    background-color: #c42329;
+    transform: translateY(-2px);
+}
+
+.cookie-btn.decline {
+    background-color: #f1f1f1;
+    color: #666;
+}
+
+.cookie-btn.decline:hover {
+    background-color: #e1e1e1;
+    transform: translateY(-2px);
+}
+
+.cookie-policy-link {
+    color: #888;
+    font-size: 0.8rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.cookie-policy-link:hover {
+    color: var(--amsterdam-red);
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .cookie-bento {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}
+
 @media (max-width: 768px) {
     .hero h1 {
         font-size: 2.5rem;

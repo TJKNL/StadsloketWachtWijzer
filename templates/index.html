@@ -1,6 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ lang|default('nl') }}">
     <head>
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XECBEDSBR"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          
+          // Check for consent cookie before enabling tracking
+          const hasConsent = document.cookie.split(';').some(c => c.trim().startsWith('analytics_consent='));
+          if(hasConsent) {
+            gtag('config', 'G-4XECBEDSBR');
+          } else {
+            // No tracking until consent is given, still initialize but with analytics_storage: 'denied'
+            gtag('config', 'G-4XECBEDSBR', { 'analytics_storage': 'denied' });
+          }
+        </script>
+        
         <!-- Primary Meta Tags -->
         <meta charset="UTF-8">
         <title>Amsterdam Stadsloket WachtWijzer | Real-time Wachtijden</title>
@@ -59,6 +76,17 @@
         <meta http-equiv="Cache-Control" content="max-age=1800">
     </head>
 <body>
+    <!-- Cookie Consent Banner - Redesigned as a bento box -->
+    <div id="cookie-consent" class="cookie-bento">
+        <h3><i class="fas fa-cookie-bite"></i> Cookie Toestemming</h3>
+        <p>We gebruiken cookies voor analyse en een betere ervaring.</p>
+        <div class="cookie-buttons">
+            <button id="cookie-accept" class="cookie-btn accept">Accepteren</button>
+            <button id="cookie-decline" class="cookie-btn decline">Weigeren</button>
+        </div>
+        <a href="{{ url_for('privacy') }}" class="cookie-policy-link">Meer info</a>
+    </div>
+
     <header class="hero">
         <div class="hero-content">
             <h1>Stadsloket WachtWijzer</h1>
@@ -161,6 +189,41 @@
                 });
             })
             .catch(error => console.error('Error loading chart data:', error));
+
+        // Cookie consent functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const cookieBanner = document.getElementById('cookie-consent');
+            const acceptBtn = document.getElementById('cookie-accept');
+            const declineBtn = document.getElementById('cookie-decline');
+            
+            // Check if user has already made a choice
+            const hasConsent = document.cookie.split(';').some(c => c.trim().startsWith('analytics_consent='));
+            
+            // Hide banner if consent already given or explicitly declined
+            if (hasConsent) {
+                cookieBanner.style.display = 'none';
+            }
+            
+            acceptBtn.addEventListener('click', function() {
+                // Set consent cookie that expires in 365 days
+                document.cookie = 'analytics_consent=true; max-age=' + (86400 * 365) + '; path=/; SameSite=Lax';
+                cookieBanner.style.display = 'none';
+                
+                // Now enable analytics since user accepted
+                gtag('consent', 'update', {
+                    'analytics_storage': 'granted'
+                });
+                
+                // Trigger pageview after consent
+                gtag('config', 'G-4XECBEDSBR', { 'send_page_view': true });
+            });
+            
+            declineBtn.addEventListener('click', function() {
+                // Set negative consent cookie so we don't ask again
+                document.cookie = 'analytics_consent=false; max-age=' + (86400 * 365) + '; path=/; SameSite=Lax';
+                cookieBanner.style.display = 'none';
+            });
+        });
     </script>
 
     <footer class="footer">
