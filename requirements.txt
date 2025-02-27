@@ -1,8 +1,8 @@
-requests>=2.25.0
+requests
 psycopg2-binary
-flask>=2.0.0
-python-dotenv>=0.19.0
-schedule==1.1.0
-pytz>=2021.1
-gunicorn>=20.1.0
-mysql-connector-python>=8.0.0
+flask
+python-dotenv
+schedule
+pytz
+gunicorn
+mysql-connector-python
