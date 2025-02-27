@@ -25,7 +25,15 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-# Get database URL from environment variable
+# Create proper database configuration dictionary - FIX for string indices error
+db_config = {
+    'host': os.getenv('DB_HOST'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'database': os.getenv('DB_NAME')
+}
+
+# Keep the connection string for WaitTimeLib if needed
 db_url = os.environ.get('DATABASE_URL')
 
 # Main application URL
@@ -37,7 +45,9 @@ def wait_time_session():
     """Context manager for handling database connections safely"""
     wait_time = None
     try:
-        wait_time = WaitTimeLib(db_url)
+        # Use the individual connection parameters if WaitTimeLib expects dictionary
+        # or use db_url if it expects a connection string
+        wait_time = WaitTimeLib(db_config)
         yield wait_time
     except Exception as e:
         logger.error(f"Database connection error: {e}")
@@ -114,9 +124,9 @@ def main():
     """Main function to run the data collector"""
     logger.info("Starting data collector service...")
     
-    # Ensure database exists
+    # Ensure database exists - FIX: Use db_config dictionary instead of db_url string
     try:
-        create_database(db_url)
+        create_database(db_config)
     except Exception as e:
         logger.error(f"Failed to create database: {e}")
         return
