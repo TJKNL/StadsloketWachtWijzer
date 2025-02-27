@@ -87,11 +87,15 @@ def create_app():
     # SEO - Serve sitemap and robots.txt
     @app.route('/sitemap.xml')
     def sitemap():
-        return send_from_directory(app.root_path, 'sitemap.xml')
+        response = send_from_directory(app.root_path, 'sitemap.xml')
+        response.headers['Content-Type'] = 'application/xml'
+        return response
 
     @app.route('/robots.txt')
     def robots():
-        return send_from_directory(app.root_path, 'robots.txt')
+        response = send_from_directory(app.root_path, 'robots.txt')
+        response.headers['Content-Type'] = 'text/plain'
+        return response
         
     # Privacy policy page
     @app.route('/privacy', methods=['GET'])
