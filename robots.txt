@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
+Allow: /privacy
 Disallow: /health
+Disallow: /mean_wait_times
+Disallow: /hourly_data
 
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://stadsloket-wachtwijzer-amsterdam.nl/sitemap.xml

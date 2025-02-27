@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
    <url>
-      <loc>https://yourdomain.com/</loc>
-      <lastmod>2023-10-01</lastmod>
-      <changefreq>daily</changefreq>
+      <loc>https://stadsloket-wachtwijzer-amsterdam.nl/</loc>
+      <lastmod>2025-02-27</lastmod>
+      <changefreq>hourly</changefreq>
       <priority>1.0</priority>
+      <xhtml:link 
+        rel="alternate" 
+        hreflang="nl" 
+        href="https://stadsloket-wachtwijzer-amsterdam.nl/?lang=nl"/>
+      <xhtml:link 
+        rel="alternate" 
+        hreflang="en" 
+        href="https://stadsloket-wachtwijzer-amsterdam.nl/?lang=en"/>
+   </url>
+   <url>
+      <loc>https://stadsloket-wachtwijzer-amsterdam.nl/privacy</loc>
+      <lastmod>2025-02-27</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.5</priority>
    </url>
 </urlset>
