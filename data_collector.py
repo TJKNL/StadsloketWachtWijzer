@@ -40,6 +40,10 @@ db_url = os.environ.get('DATABASE_URL')
 APP_URL = 'https://stadsloket-wachtwijzer-amsterdam.nl'
 HEALTH_CHECK_PATH = '/health'
 
+# Define active hours (7:00 to 23:00)
+ACTIVE_HOURS_START = 7  # 7 AM
+ACTIVE_HOURS_END = 23   # 11 PM
+
 @contextmanager
 def wait_time_session():
     """Context manager for handling database connections safely"""
@@ -114,15 +118,28 @@ def backup_ping():
         logger.error(f"Failed to send backup ping: {e}")
         return False
 
+def is_active_hours():
+    """Check if current time is within active hours (7:00-23:00)"""
+    current_time = datetime.now(amsterdam_tz)
+    current_hour = current_time.hour
+    return ACTIVE_HOURS_START <= current_hour < ACTIVE_HOURS_END
+
 def keep_server_awake():
-    """Keep the server awake by pinging it"""
+    """Keep the server awake by pinging it, but only during active hours"""
+    if not is_active_hours():
+        logger.info(f"Outside active hours ({ACTIVE_HOURS_START}:00-{ACTIVE_HOURS_END}:00), skipping server ping")
+        return False
+    
+    logger.info(f"Within active hours ({ACTIVE_HOURS_START}:00-{ACTIVE_HOURS_END}:00), pinging server")
     if not ping_server():
         # If health check fails, try the main URL
-        backup_ping()
+        return backup_ping()
+    return True
 
 def main():
     """Main function to run the data collector"""
     logger.info("Starting data collector service...")
+    logger.info(f"Server will only be pinged between {ACTIVE_HOURS_START}:00 and {ACTIVE_HOURS_END}:00 Amsterdam time")
     
     # Ensure database exists - FIX: Use db_config dictionary instead of db_url string
     try:
@@ -140,7 +157,9 @@ def main():
     
     # Run immediately on startup
     collect_data()
-    keep_server_awake()
+    # Only ping if within active hours
+    if is_active_hours():
+        keep_server_awake()
     
     # Keep the script running
     while True:
