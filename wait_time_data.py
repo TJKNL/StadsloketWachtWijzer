@@ -133,7 +133,7 @@ class WaitTimeLib:
 
     def get_current_waiting(self):
         self.cursor.execute("""
-            SELECT wt.stadsloket_id, ln.loket_name, wt.waiting
+            SELECT wt.stadsloket_id, ln.loket_name, wt.waittime, wt.waiting
             FROM wait_times wt
             LEFT JOIN loket_names ln ON wt.stadsloket_id = ln.stadsloket_id
             WHERE wt.timestamp = (
@@ -142,7 +142,7 @@ class WaitTimeLib:
                 WHERE stadsloket_id = wt.stadsloket_id
             )
         """)
-        return [(sid, name or 'Unknown', waiting) for sid, name, waiting in self.cursor.fetchall()]
+        return [(sid, name or 'Unknown', waittime, waiting) for sid, name, waittime, waiting in self.cursor.fetchall()]
 
     def get_hourly_averages(self):
         """Get average wait times in minutes by hour of day for each stadsloket"""

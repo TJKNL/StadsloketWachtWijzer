@@ -106,22 +106,13 @@ def create_app():
     # Routes
     @app.route('/', methods=['GET'])
     def index():
-        # Get language from query parameter or default to Dutch
         lang = request.args.get('lang', 'nl')
         
         try:
             with get_db() as wait_time_data:
-                mean_waits = wait_time_data.get_mean_wait_times()
-                current_waiting = wait_time_data.get_current_waiting()
+                current_data = wait_time_data.get_current_waiting()
                 last_update = wait_time_data.get_last_update_time()
-                
-                # Combine mean_waits and current_waiting data
-                combined_data = []
-                for mw in mean_waits:
-                    current = next((cw for cw in current_waiting if cw[0] == mw[0]), (None, None, 0))
-                    combined_data.append((*mw, current[2]))
-                
-                best_loket = min(combined_data, key=lambda x: x[2]) if combined_data else None
+                best_loket = min(current_data, key=lambda x: x[2]) if current_data else None
                 
                 # Get base URL for canonical link
                 host = request.host_url.rstrip('/')
@@ -134,7 +125,7 @@ def create_app():
                 }
                 
             return render_template('index.html', 
-                                  loket_data=combined_data, 
+                                  loket_data=current_data, 
                                   best_loket=best_loket,
                                   last_update=last_update,
                                   canonical_url=canonical_url,
