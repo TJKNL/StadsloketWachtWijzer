@@ -21,6 +21,25 @@
     <title>Privacybeleid | Amsterdam Stadsloket Wachttijden</title>
     <meta name="description" content="Ons privacybeleid beschrijft hoe wij omgaan met uw gegevens bij het gebruik van de Amsterdam Stadsloket Wachttijden service.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Canonical URL - Adding this to tell search engines this is NOT the main page -->
+    <link rel="canonical" href="{{ url_for('privacy', _external=True) }}" />
+    
+    <!-- Structured Data for privacy policy page -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Privacybeleid",
+      "description": "Ons privacybeleid beschrijft hoe wij omgaan met uw gegevens bij het gebruik van de Amsterdam Stadsloket Wachttijden service.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "Amsterdam Stadsloket Wachttijden",
+        "url": "{{ request.url_root }}"
+      }
+    }
+    </script>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">

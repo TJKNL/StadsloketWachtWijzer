@@ -20,10 +20,18 @@
         
         <!-- Primary Meta Tags -->
         <meta charset="UTF-8">
-        <title>Amsterdam Stadsloket WachtWijzer | Real-time Wachtijden</title>
-        <meta name="description" content="Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en plan uw bezoek efficiënt.">
-        <meta name="keywords" content="Amsterdam stadsloket, wachttijden Amsterdam, gemeente Amsterdam wachtrij, loket wachttijd, stadsdeel wachttijden, gemeentelijke diensten Amsterdam">
+        <title>WachtWijzer Stadsloketten Amsterdam | Live Actuele Wachttijden</title>
+        <meta name="description" content="Bekijk direct de actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en bespaar tijd bij uw bezoek aan het stadsloket.">
+        <meta name="keywords" content="wachttijden stadsloketten Amsterdam, Amsterdam stadsloket wachtrij, gemeente Amsterdam wachttijd, actuele wachtrijen stadsloketten, wachttijden gemeente Amsterdam">
         <meta name="author" content="Twan Kerkhof">
+        
+        <!-- Canonical URL - Adding this to help search engines understand this is the main page -->
+        <link rel="canonical" href="{{ request.url_root }}" />
+        
+        <!-- Language alternates for SEO -->
+        <link rel="alternate" hreflang="nl" href="{{ request.url_root }}?lang=nl" />
+        <link rel="alternate" hreflang="en" href="{{ request.url_root }}?lang=en" />
+        <link rel="alternate" hreflang="x-default" href="{{ request.url_root }}" />
         
         <!-- Viewport and Favicon -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,14 +41,14 @@
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
         <meta property="og:url" content="{{ request.url }}">
-        <meta property="og:title" content="Amsterdam Stadsloket Wachttijden | Actuele Informatie">
+        <meta property="og:title" content="Wachttijden Stadsloketten Amsterdam | Actuele Informatie">
         <meta property="og:description" content="Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en plan uw bezoek efficiënt.">
         <meta property="og:image" content="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png', _external=True) }}">
         
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
         <meta property="twitter:url" content="{{ request.url }}">
-        <meta property="twitter:title" content="Amsterdam Stadsloket Wachttijden | Actuele Informatie">
+        <meta property="twitter:title" content="Wachttijden Stadsloketten Amsterdam | Actuele Informatie">
         <meta property="twitter:description" content="Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en plan uw bezoek efficiënt.">
         <meta property="twitter:image" content="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png', _external=True) }}">
         
@@ -49,14 +57,23 @@
         {
           "@context": "https://schema.org",
           "@type": "WebApplication",
-          "name": "Amsterdam Stadsloket Wachttijden",
+          "name": "Wachttijden Stadsloketten Amsterdam",
           "description": "Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam",
           "url": "{{ request.url_root }}",
           "applicationCategory": "UtilityApplication",
           "operatingSystem": "All",
+          "keywords": "wachttijden, stadsloketten, Amsterdam, wachtrij, gemeente",
           "offers": {
             "@type": "Offer",
             "price": "0"
+          },
+          "provider": {
+            "@type": "Person",
+            "name": "Twan Kerkhof"
+          },
+          "audience": {
+            "@type": "Audience",
+            "audienceType": "Inwoners Amsterdam"
           }
         }
         </script>
@@ -89,13 +106,23 @@
 
     <header class="hero">
         <div class="hero-content">
-            <h1>Stadsloket WachtWijzer</h1>
-            <p>Real-time wachttijden voor de Amsterdamse Stadsloketten</p>
+            <h1>Wachttijden Stadsloketten Amsterdam</h1>
+            <p>Live actuele wachtrijen bij alle Amsterdamse stadsloketten</p>
         </div>
         <div class="hero-image">
-            <img src="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png') }}" alt="Amsterdam cityscape">
+            <img src="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png') }}" alt="Amsterdam stadsloketten wachttijden">
         </div>
     </header>
+    
+    <!-- Breadcrumb navigation for SEO - Updated to match site style -->
+    <div class="breadcrumb">
+        <div class="content-container">
+            <span>
+                <a href="{{ request.url_root }}">Home</a> »
+                <span>Wachttijden Stadsloketten Amsterdam</span>
+            </span>
+        </div>
+    </div>
 
     <!-- Add the last updated information below the header -->
     <div class="data-status">
@@ -133,6 +160,33 @@
         <p>Average wait times in minutes throughout the day (8:00-18:00)</p>
         <canvas id="seasonalityChart"></canvas>
     </div>
+    
+    <!-- FAQ Section - Updated to match bento box style -->
+    <section class="faq-section">
+        <h2>Veelgestelde vragen:</h2>
+        
+        <div class="faq-items">
+            <div class="faq-item">
+                <h3><i class="fas fa-question-circle"></i> Hoe lang is de wachttijd bij stadsloketten Amsterdam?</h3>
+                <p>De wachttijden verschillen per stadsloket en per dagdeel. Bovenaan deze pagina ziet u de actuele wachttijden bij elk stadsloket in Amsterdam. De gemiddelde wachttijd varieert meestal tussen 5 en 30 minuten.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3><i class="fas fa-map-marker-alt"></i> Welk stadsloket in Amsterdam heeft de kortste wachttijd?</h3>
+                <p>Bovenaan deze pagina tonen we het aanbevolen stadsloket met de kortste wachttijd op dit moment. Dit wordt real-time bijgewerkt om u te helpen tijd te besparen.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3><i class="fas fa-clock"></i> Wanneer zijn de wachttijden het kortst?</h3>
+                <p>Uit onze gegevens blijkt dat de wachttijden meestal het kortst zijn in de ochtend (8:00-10:00) en aan het einde van de middag (15:00-17:00). De drukste tijden zijn meestal rond lunchtijd (12:00-14:00).</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3><i class="fas fa-calendar-check"></i> Moet ik een afspraak maken?</h3>
+                <p>Voor alle diensten bij stadsloketten in Amsterdam is geen afspraak nodig. Alleen voor het stadsloket in Weesp moeten u altijd een afspraak maken. Kijk voor meer informatie op <a href="https://www.amsterdam.nl/contact/" target="_blank">officiële website van de gemeente Amsterdam</a>.</p>
+            </div>
+        </div>
+    </section>
     
     <script>
         // Fetch hourly data and create chart
@@ -227,7 +281,11 @@
     </script>
 
     <footer class="footer">
-        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time waiting information stadsloketten Amsterdam</p>
+        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time wachttijden stadsloketten Amsterdam</p>
+        <nav class="footer-nav">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('privacy') }}">Privacybeleid</a>
+        </nav>
     </footer>
 </body>
 </html>

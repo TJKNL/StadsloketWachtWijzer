@@ -229,7 +229,7 @@ a:focus, button:focus {
 .content-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 0 1rem;
 }
 
 .privacy-policy {
@@ -351,6 +351,88 @@ a:focus, button:focus {
 
 .cookie-policy-link:hover {
     color: var(--amsterdam-red);
+    text-decoration: underline;
+}
+
+/* Breadcrumb Styling - Updated to match site style */
+.breadcrumb {
+    background: white;
+    padding: 0.75rem 2rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #eee;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.breadcrumb .content-container {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb a {
+    color: var(--amsterdam-red);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+/* FAQ Section Styling - Updated to match bento boxes */
+.faq-section {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+.faq-section > h2 {
+    color: var(--amsterdam-red);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    font-size: 1.8rem;
+}
+
+.faq-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.faq-item {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.faq-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.faq-item h3 {
+    color: var(--amsterdam-red);
+    margin-bottom: 1rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.faq-item p {
+    color: #666;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+.faq-item a {
+    color: var(--amsterdam-red);
+    text-decoration: none;
+}
+
+.faq-item a:hover {
     text-decoration: underline;
 }
 
