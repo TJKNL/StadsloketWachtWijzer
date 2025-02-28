@@ -108,6 +108,11 @@ def create_app():
         response = send_from_directory(app.root_path, 'robots.txt')
         response.headers['Content-Type'] = 'text/plain'
         return response
+
+    # Serve ads.txt from static directory (though static serving should handle this)
+    @app.route('/ads.txt')
+    def ads_txt():
+        return send_from_directory(app.static_folder, 'ads.txt', mimetype='text/plain')
         
     # Privacy policy page
     @app.route('/privacy', methods=['GET'])
