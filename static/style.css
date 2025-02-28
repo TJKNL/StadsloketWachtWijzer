@@ -187,18 +187,19 @@ body {
     top: 1rem;
     right: 1rem;
     display: flex;
-    gap: 0.5rem;
+    gap: 0.2rem;
     z-index: 9999;
     background-color: rgba(0,0,0,0.6);
     color: #fff;
-    padding: 0.5rem;
+    padding: 0.2rem;
     border-radius: 0.5rem;
 }
 
 .language-switcher a {
     text-decoration: none;
-    font-size: 1.2rem;
+    font-size: 0.8rem;
     transition: transform 0.2s;
+    padding: 0.1rem 0.2rem;
 }
 
 .language-switcher a:hover {
@@ -208,7 +209,7 @@ body {
 .language-switcher a {
     color: white;
     text-decoration: none;
-    padding: 0.2rem 0.5rem;
+    padding: 0.1rem 0.2rem;
     border-radius: 4px;
 }
 
