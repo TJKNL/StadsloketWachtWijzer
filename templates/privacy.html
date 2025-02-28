@@ -133,20 +133,20 @@
     <footer class="footer">
         <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time waiting information stadsloketten Amsterdam</p>
         <nav class="footer-nav">
-            <a href="{{ url_for('index') }}">Home</a>
-            <a href="{{ url_for('privacy') }}">Privacybeleid</a>
+            <a href="{{ url_for('index') }}">{{ translations[lang]['nav_home'] }}</a>
+            <a href="{{ url_for('privacy') }}">{{ translations[lang]['nav_privacy'] }}</a>
         </nav>
     </footer>
 
     <!-- Cookie Consent Banner - Redesigned as a bento box -->
     <div id="cookie-consent" class="cookie-bento">
-        <h3><i class="fas fa-cookie-bite"></i> Cookie Toestemming</h3>
-        <p>We gebruiken cookies voor analyse en een betere ervaring.</p>
+        <h3><i class="fas fa-cookie-bite"></i> {{ translations[lang]['cookie_banner_title'] }}</h3>
+        <p>{{ translations[lang]['cookie_banner_text'] }}</p>
         <div class="cookie-buttons">
-            <button id="cookie-accept" class="cookie-btn accept">Accepteren</button>
-            <button id="cookie-decline" class="cookie-btn decline">Weigeren</button>
+            <button id="cookie-accept" class="cookie-btn accept">{{ translations[lang]['cookie_accept_button'] }}</button>
+            <button id="cookie-decline" class="cookie-btn decline">{{ translations[lang]['cookie_decline_button'] }}</button>
         </div>
-        <a href="{{ url_for('privacy') }}" class="cookie-policy-link">Meer info</a>
+        <a href="{{ url_for('privacy') }}" class="cookie-policy-link">{{ translations[lang]['cookie_more_info'] }}</a>
     </div>
 
     <script>

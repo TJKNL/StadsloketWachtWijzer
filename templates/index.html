@@ -114,15 +114,15 @@
             </a>
         {% endfor %}
     </div>
-    <!-- Cookie Consent Banner - Redesigned as a bento box -->
+    <!-- Cookie Consent Banner -->
     <div id="cookie-consent" class="cookie-bento">
-        <h3><i class="fas fa-cookie-bite"></i> Cookie Toestemming</h3>
-        <p>We gebruiken cookies voor analyse en een betere ervaring.</p>
+        <h3><i class="fas fa-cookie-bite"></i> {{ translations[lang]['cookie_banner_title'] }}</h3>
+        <p>{{ translations[lang]['cookie_banner_text'] }}</p>
         <div class="cookie-buttons">
-            <button id="cookie-accept" class="cookie-btn accept">Accepteren</button>
-            <button id="cookie-decline" class="cookie-btn decline">Weigeren</button>
+            <button id="cookie-accept" class="cookie-btn accept">{{ translations[lang]['cookie_accept_button'] }}</button>
+            <button id="cookie-decline" class="cookie-btn decline">{{ translations[lang]['cookie_decline_button'] }}</button>
         </div>
-        <a href="{{ url_for('privacy') }}" class="cookie-policy-link">Meer info</a>
+        <a href="{{ url_for('privacy') }}" class="cookie-policy-link">{{ translations[lang]['cookie_more_info'] }}</a>
     </div>
 
     <header class="hero">
@@ -157,10 +157,10 @@
     {% if best_loket %}
     <div class="bento">
         <div class="best-loket">
-            <h2><i class="fas fa-star"></i> Recommended Location</h2>
+            <h2><i class="fas fa-star"></i> {{ translations[lang]['card_recommended_location'] }}</h2>
             <p><i class="fas fa-building"></i> {{ best_loket[1] }}</p>
-            <p><i class="fas fa-clock"></i> Current wait: {{ best_loket[2] }} minutes</p>
-            <p><i class="fas fa-users"></i> Currently waiting: {{ best_loket[3] }} people</p>
+            <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ best_loket[2] }} minutes</p>
+            <p><i class="fas fa-users"></i> {{ translations[lang]['card_currently_waiting'] }}: {{ best_loket[3] }} people</p>
         </div>
     </div>
     {% endif %}
@@ -169,42 +169,42 @@
         {% for loket in loket_data %}
         <div>
             <h3><i class="fas fa-building"></i> {{ loket[1] }}</h3>
-            <p><i class="fas fa-clock"></i> Current wait: {{ loket[2] }} minutes</p>
-            <p><i class="fas fa-users"></i> Currently waiting: {{ loket[3] }} people</p>
+            <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ loket[2] }} minutes</p>
+            <p><i class="fas fa-users"></i> {{ translations[lang]['card_currently_waiting'] }}: {{ loket[3] }} people</p>
         </div>
         {% endfor %}
     </div>
     
     <!-- Daily Seasonality Chart Section -->
     <div class="chart-container">
-        <h2>Daily Wait Time Patterns</h2>
-        <p>Average wait times in minutes throughout the day (8:00-18:00)</p>
+        <h2>{{ translations[lang]['plot_title'] }}</h2>
+        <p>{{ translations[lang]['plot_subtitle'] }}</p>
         <canvas id="seasonalityChart"></canvas>
     </div>
     
     <!-- FAQ Section - Updated to match bento box style -->
     <section class="faq-section">
-        <h2>Veelgestelde vragen:</h2>
+        <h2>{{ translations[lang]['faq_title'] }}</h2>
         
         <div class="faq-items">
             <div class="faq-item">
-                <h3><i class="fas fa-question-circle"></i> Hoe lang is de wachttijd bij stadsloketten Amsterdam?</h3>
-                <p>De wachttijden verschillen per stadsloket en per dagdeel. Bovenaan deze pagina ziet u de actuele wachttijden bij elk stadsloket in Amsterdam. De gemiddelde wachttijd varieert meestal tussen 5 en 30 minuten.</p>
+                <h3><i class="fas fa-question-circle"></i> {{ translations[lang]['faq_q1_title'] }}</h3>
+                <p>{{ translations[lang]['faq_q1_text'] }}</p>
             </div>
             
             <div class="faq-item">
-                <h3><i class="fas fa-map-marker-alt"></i> Welk stadsloket in Amsterdam heeft de kortste wachttijd?</h3>
-                <p>Bovenaan deze pagina tonen we het aanbevolen stadsloket met de kortste wachttijd op dit moment. Dit wordt real-time bijgewerkt om u te helpen tijd te besparen.</p>
+                <h3><i class="fas fa-map-marker-alt"></i> {{ translations[lang]['faq_q2_title'] }}</h3>
+                <p>{{ translations[lang]['faq_q2_text'] }}</p>
             </div>
             
             <div class="faq-item">
-                <h3><i class="fas fa-clock"></i> Wanneer zijn de wachttijden het kortst?</h3>
-                <p>Uit onze gegevens blijkt dat de wachttijden meestal het kortst zijn in de ochtend (8:00-10:00) en aan het einde van de middag (15:00-17:00). De drukste tijden zijn meestal rond lunchtijd (12:00-14:00).</p>
+                <h3><i class="fas fa-clock"></i> {{ translations[lang]['faq_q3_title'] }}</h3>
+                <p>{{ translations[lang]['faq_q3_text'] }}</p>
             </div>
             
             <div class="faq-item">
-                <h3><i class="fas fa-calendar-check"></i> Moet ik een afspraak maken?</h3>
-                <p>Voor alle diensten bij stadsloketten in Amsterdam is geen afspraak nodig. Alleen voor het stadsloket in Weesp moeten u altijd een afspraak maken. Kijk voor meer informatie op <a href="https://www.amsterdam.nl/contact/" target="_blank">officiële website van de gemeente Amsterdam</a>.</p>
+                <h3><i class="fas fa-calendar-check"></i> {{ translations[lang]['faq_q4_title'] }}</h3>
+                <p>{{ translations[lang]['faq_q4_text'] }}</p>
             </div>
         </div>
     </section>
@@ -305,8 +305,8 @@
         <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time wachttijden stadsloketten Amsterdam</p>
         <p style="color: #999;">Deze website is een onafhankelijk initiatief en heeft geen officiële relatie met de gemeente Amsterdam.</p>
         <nav class="footer-nav">
-            <a href="{{ url_for('index') }}">Home</a>
-            <a href="{{ url_for('privacy') }}">Privacybeleid</a>
+            <a href="{{ url_for('index') }}">{{ translations[lang]['nav_home'] }}</a>
+            <a href="{{ url_for('privacy') }}">{{ translations[lang]['nav_privacy'] }}</a>
         </nav>
     </footer>
 </body>
