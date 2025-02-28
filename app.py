@@ -5,6 +5,7 @@ import os
 import logging
 from contextlib import contextmanager
 import time
+from translations import translations
 
 # Load environment variables before anything else
 load_dotenv()
@@ -54,6 +55,17 @@ def create_app():
             if wait_time_data:
                 wait_time_data.close()
     
+    @app.context_processor
+    def inject_languages():
+        return {
+            'supported_languages': [
+                ('nl', 'Dutch', '🇳🇱'),
+                ('en', 'English', '🇬🇧'),
+                ('tr', 'Turkish', '🇹🇷'),
+                ('ma', 'Moroccan', '🇲🇦')
+            ]
+        }
+    
     # Request handlers
     @app.before_request
     def before_request():
@@ -101,7 +113,9 @@ def create_app():
     @app.route('/privacy', methods=['GET'])
     def privacy():
         lang = request.args.get('lang', 'nl')
-        return render_template('privacy.html', lang=lang)
+        return render_template('privacy.html',
+                               translations=translations,
+                               lang=lang)
     
     # Routes
     @app.route('/', methods=['GET'])
@@ -121,7 +135,9 @@ def create_app():
                 # Add alternate language links
                 lang_urls = {
                     'nl': f"{host}{request.path}?lang=nl",
-                    'en': f"{host}{request.path}?lang=en"
+                    'en': f"{host}{request.path}?lang=en",
+                    'tr': f"{host}{request.path}?lang=tr",
+                    'ma': f"{host}{request.path}?lang=ma"
                 }
                 
             return render_template('index.html', 
@@ -130,7 +146,8 @@ def create_app():
                                   last_update=last_update,
                                   canonical_url=canonical_url,
                                   lang=lang,
-                                  lang_urls=lang_urls)
+                                  lang_urls=lang_urls,
+                                  translations=translations)
         except Exception as e:
             logger.error(f"Error in index route: {e}")
             return render_template('index.html', 
@@ -139,7 +156,8 @@ def create_app():
                                   last_update=None,
                                   error="Unable to fetch data",
                                   canonical_url=request.url,
-                                  lang=lang)
+                                  lang=lang,
+                                  translations=translations)
 
     @app.route('/mean_wait_times', methods=['GET'])
     def mean_wait_times():

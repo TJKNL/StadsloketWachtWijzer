@@ -20,8 +20,20 @@
         
         <!-- Primary Meta Tags -->
         <meta charset="UTF-8">
+        {% if lang == 'nl' %}
         <title>WachtWijzer Stadsloketten Amsterdam | Live Actuele Wachttijden</title>
-        <meta name="description" content="Bekijk direct de actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en bespaar tijd bij uw bezoek aan het stadsloket.">
+        <meta name="description" content="Bekijk direct de actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en bespaar tijd.">
+        {% elif lang == 'en' %}
+        <title>Amsterdam City Offices Wait Times | Live Updates</title>
+        <meta name="description" content="Check real-time wait times at Amsterdam City Offices. Find the shortest queue instantly.">
+        {% elif lang == 'tr' %}
+        <title>Amsterdam Şehir Ofisleri Bekleme Süreleri | Canlı Güncellemeler</title>
+        <meta name="description" content="Amsterdam Şehir Ofislerindeki bekleme sürelerini kontrol edin. En kısa kuyruğu hemen bulun.">
+        {% elif lang == 'ma' %}
+        <title>أوقات الانتظار في مكاتب مدينة أمستردام | معلومات مباشرة</title>
+        <meta name="description" content="تحقق من أوقات الانتظار في مكاتب مدينة أمستردام. اعثر على أقصر طابور على الفور.">
+        {% endif %}
+        
         <meta name="keywords" content="wachttijden stadsloketten Amsterdam, Amsterdam stadsloket wachtrij, gemeente Amsterdam wachttijd, actuele wachtrijen stadsloketten, wachttijden gemeente Amsterdam">
         <meta name="author" content="Twan Kerkhof">
         
@@ -31,6 +43,8 @@
         <!-- Language alternates for SEO -->
         <link rel="alternate" hreflang="nl" href="{{ request.url_root }}?lang=nl" />
         <link rel="alternate" hreflang="en" href="{{ request.url_root }}?lang=en" />
+        <link rel="alternate" hreflang="tr" href="{{ request.url_root }}?lang=tr" />
+        <link rel="alternate" hreflang="ma" href="{{ request.url_root }}?lang=ma" />
         <link rel="alternate" hreflang="x-default" href="{{ request.url_root }}" />
         
         <!-- Viewport and Favicon -->
@@ -93,6 +107,13 @@
         <meta http-equiv="Cache-Control" content="max-age=1800">
     </head>
 <body>
+    <div class="language-switcher">
+        {% for code, label, flag in supported_languages %}
+            <a href="?lang={{ code }}">
+                {{ flag }}
+            </a>
+        {% endfor %}
+    </div>
     <!-- Cookie Consent Banner - Redesigned as a bento box -->
     <div id="cookie-consent" class="cookie-bento">
         <h3><i class="fas fa-cookie-bite"></i> Cookie Toestemming</h3>
@@ -106,8 +127,8 @@
 
     <header class="hero">
         <div class="hero-content">
-            <h1>Wachttijden Stadsloketten Amsterdam</h1>
-            <p>Live actuele wachtrijen bij alle Amsterdamse stadsloketten</p>
+            <h1>{{ translations[lang]['hero_title'] }}</h1>
+            <p>{{ translations[lang]['hero_subtitle'] }}</p>
         </div>
         <div class="hero-image">
             <img src="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png') }}" alt="Amsterdam stadsloketten wachttijden">

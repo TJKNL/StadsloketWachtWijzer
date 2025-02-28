@@ -18,8 +18,9 @@
     
     <!-- Primary Meta Tags -->
     <meta charset="UTF-8">
-    <title>Privacybeleid | Amsterdam Stadsloket Wachttijden</title>
-    <meta name="description" content="Ons privacybeleid beschrijft hoe wij omgaan met uw gegevens bij het gebruik van de Amsterdam Stadsloket Wachttijden service.">
+    <title>{{ translations[lang]['privacy_title'] }}</title>
+    <meta name="description" content="{{ translations[lang]['privacy_description'] }}">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Canonical URL - Adding this to tell search engines this is NOT the main page -->
@@ -43,8 +44,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <link rel="alternate" hreflang="nl" href="{{ url_for('privacy', _external=True) }}?lang=nl" />
+    <link rel="alternate" hreflang="en" href="{{ url_for('privacy', _external=True) }}?lang=en" />
+    <link rel="alternate" hreflang="tr" href="{{ url_for('privacy', _external=True) }}?lang=tr" />
+    <link rel="alternate" hreflang="ma" href="{{ url_for('privacy', _external=True) }}?lang=ma" />
+    <link rel="alternate" hreflang="x-default" href="{{ url_for('privacy', _external=True) }}" />
 </head>
 <body>
+    <div class="language-switcher">
+        {% for code, label, flag in supported_languages %}
+            <a href="?lang={{ code }}">
+                {{ flag }}
+            </a>
+        {% endfor %}
+    </div>
     <header class="hero">
         <div class="hero-content">
             <h1>Privacybeleid</h1>
