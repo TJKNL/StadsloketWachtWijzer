@@ -179,7 +179,9 @@
     <div class="chart-container">
         <h2>{{ translations[lang]['plot_title'] }}</h2>
         <p>{{ translations[lang]['plot_subtitle'] }}</p>
-        <canvas id="seasonalityChart"></canvas>
+        <div class="chart-responsive-wrapper">
+            <canvas id="seasonalityChart"></canvas>
+        </div>
     </div>
     
     <!-- FAQ Section - Updated to match bento box style -->
@@ -231,6 +233,7 @@
                     data: data,
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
                                 position: 'top',

@@ -119,6 +119,13 @@ body {
     max-width: 1200px;
 }
 
+.chart-responsive-wrapper {
+    position: relative;
+    height: 50vh; /* Dynamic height based on viewport height */
+    min-height: 400px; /* Minimum height */
+    width: 100%;
+}
+
 .chart-container h2 {
     color: var(--amsterdam-red);
     margin-bottom: 0.5rem;
@@ -472,5 +479,8 @@ a:focus, button:focus {
     }
     .bento {
         grid-template-columns: 1fr;
+    }
+    .chart-responsive-wrapper {
+        height: 60vh; /* Taller on mobile */
     }
 }
