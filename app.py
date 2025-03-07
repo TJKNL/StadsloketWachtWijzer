@@ -168,8 +168,41 @@ def create_app():
     @app.route('/hourly_data', methods=['GET'])
     def hourly_data():
         try:
+            # Get the day parameter from the request, defaulting to the current day
+            # 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+            day_param = request.args.get('day')
+            
+            if day_param is not None:
+                try:
+                    day = int(day_param)
+                    # Ensure day is in valid range
+                    if day < 0 or day > 6:
+                        # Default to Monday if invalid
+                        day = 1
+                except ValueError:
+                    # Default to Monday if invalid
+                    day = 1
+            else:
+                # Default to current day of week
+                from datetime import datetime
+                day = datetime.now().weekday()  # 0=Monday, 1=Tuesday, ..., 6=Sunday
+                # Convert from Python's weekday (0=Monday, 6=Sunday) to 
+                # JavaScript/PostgreSQL format (0=Sunday, 1=Monday, ..., 6=Saturday)
+                if day == 6:  # Sunday in Python is 6
+                    day = 0
+                else:
+                    day += 1
+                
+                # If it's a weekend, default to Monday
+                if day == 0 or day == 6:
+                    day = 1
+            
             with get_db() as wait_time_data:
-                data = wait_time_data.get_hourly_averages()
+                data = wait_time_data.get_hourly_averages(day)
+                # Add opening hours info
+                opening_hours = wait_time_data.get_opening_hours(day)
+                data['opening_hours'] = opening_hours
+            
             return jsonify(data)
         except Exception as e:
             logger.error(f"Error in hourly_data route: {e}")

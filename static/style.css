@@ -525,6 +525,45 @@ a:focus, button:focus {
     text-decoration: underline;
 }
 
+/* Day selector styles */
+.day-selector {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.day-button {
+    padding: 0.5rem 1rem;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.day-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.day-button.active {
+    background-color: var(--amsterdam-red);
+    color: white;
+    border-color: var(--amsterdam-red);
+}
+
+.opening-hours-note {
+    text-align: center;
+    margin-top: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
 @media (max-width: 768px) {
     .cookie-bento {
         left: 20px;

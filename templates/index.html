@@ -240,6 +240,18 @@
     <div class="chart-container">
         <h2>{{ translations[lang]['plot_title'] }}</h2>
         <p>{{ translations[lang]['plot_subtitle'] }}</p>
+        
+        <!-- Day of Week Selector -->
+        <div class="day-selector">
+            <button class="day-button" data-day="1">{{ translations[lang]['day_monday'] }}</button>
+            <button class="day-button" data-day="2">{{ translations[lang]['day_tuesday'] }}</button>
+            <button class="day-button" data-day="3">{{ translations[lang]['day_wednesday'] }}</button>
+            <button class="day-button" data-day="4">{{ translations[lang]['day_thursday'] }}</button>
+            <button class="day-button" data-day="5">{{ translations[lang]['day_friday'] }}</button>
+        </div>
+        
+        <div class="opening-hours-note" id="opening-hours-note"></div>
+        
         <div class="chart-responsive-wrapper">
             <canvas id="seasonalityChart"></canvas>
         </div>
@@ -269,67 +281,244 @@
                 <h3><i class="fas fa-calendar-check"></i> {{ translations[lang]['faq_q4_title'] }}</h3>
                 <p>{{ translations[lang]['faq_q4_text'] }}</p>
             </div>
+            
+            <!-- New FAQ item for opening hours -->
+            <div class="faq-item">
+                <h3><i class="fas fa-door-open"></i> {{ translations[lang]['faq_q5_title'] }}</h3>
+                <p>{{ translations[lang]['faq_q5_text'] }}</p>
+            </div>
         </div>
     </section>
     
     <script>
-        // Fetch hourly data and create chart
-        fetch('/hourly_data')
-            .then(response => response.json())
-            .then(data => {
-                const ctx = document.getElementById('seasonalityChart').getContext('2d');
+        // Chart instance variable
+        let waitTimeChart = null;
+        
+        // Current day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+        const currentDate = new Date();
+        let currentDay = currentDate.getDay(); // JavaScript's getDay() returns 0=Sunday, 6=Saturday
+        
+        // If it's a weekend, default to Monday (day 1)
+        if (currentDay === 0 || currentDay === 6) {
+            currentDay = 1;
+        }
+        
+        // Day names for display
+        const dayNames = [
+            "{{ translations[lang]['day_sunday'] }}",
+            "{{ translations[lang]['day_monday'] }}",
+            "{{ translations[lang]['day_tuesday'] }}",
+            "{{ translations[lang]['day_wednesday'] }}",
+            "{{ translations[lang]['day_thursday'] }}",
+            "{{ translations[lang]['day_friday'] }}",
+            "{{ translations[lang]['day_saturday'] }}"
+        ];
+        
+        // Set the initial active day button
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set the initial active button
+            const dayButtons = document.querySelectorAll('.day-button');
+            dayButtons.forEach(button => {
+                if (parseInt(button.dataset.day) === currentDay) {
+                    button.classList.add('active');
+                }
                 
-                // Generate unique colors for each dataset
-                data.datasets.forEach((dataset, index) => {
-                    const hue = (index * 137) % 360; // Golden angle approximation for color distribution
-                    dataset.borderColor = `hsl(${hue}, 70%, 45%)`;
-                    dataset.backgroundColor = `hsl(${hue}, 70%, 85%, 0.2)`;
-                    dataset.tension = 0.3;
-                    dataset.pointRadius = 3;
-                    dataset.pointHoverRadius = 5;
+                // Add click event
+                button.addEventListener('click', function() {
+                    dayButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    loadChartData(parseInt(this.dataset.day));
                 });
-                
-                new Chart(ctx, {
-                    type: 'line',
-                    data: data,
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Average wait time (minutes)'
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Time of day'
-                                }
-                            }
-                        },
-                        interaction: {
-                            mode: 'nearest',
-                            axis: 'x',
-                            intersect: false
-                        }
+            });
+            
+            // Initial chart load
+            loadChartData(currentDay);
+        });
+        
+        // Load chart data for specific day
+        function loadChartData(day) {
+            fetch(`/hourly_data?day=${day}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update opening hours note
+                    updateOpeningHoursNote(data.opening_hours, day);
+                    
+                    // Apply zero values outside opening hours
+                    applyOpeningHoursFilter(data);
+                    
+                    createOrUpdateChart(data);
+                })
+                .catch(error => console.error('Error loading chart data:', error));
+        }
+        
+        // Update opening hours note with more explicit weekend messaging
+        function updateOpeningHoursNote(hours, day) {
+            const openingHoursNote = document.getElementById('opening-hours-note');
+            const [openHour, closeHour] = hours;
+            
+            console.log(`Day ${day}: hours ${openHour}-${closeHour}`); // Debug logging
+            
+            if (openHour === 0 && closeHour === 0) {
+                // Closed (weekends)
+                openingHoursNote.textContent = `${dayNames[day]}: {{ translations[lang]['closed'] }}`;
+                openingHoursNote.style.color = "#E32E35"; // Make closed days more noticeable
+            } else if (closeHour === 20) { // Extended hours detected (specifically for Thursday)
+                openingHoursNote.textContent = `${dayNames[day]}: {{ translations[lang]['open_from'] }} ${openHour}:00 {{ translations[lang]['until'] }} ${closeHour}:00 ({{ translations[lang]['extended_hours'] }})`;
+                openingHoursNote.style.color = "#666";
+            } else {
+                openingHoursNote.textContent = `${dayNames[day]}: {{ translations[lang]['open_from'] }} ${openHour}:00 {{ translations[lang]['until'] }} ${closeHour}:00`;
+                openingHoursNote.style.color = "#666";
+            }
+        }
+        
+        // Apply zero values outside opening hours - improved approach
+        function applyOpeningHoursFilter(data) {
+            const [openHour, closeHour] = data.opening_hours;
+            
+            // Process each dataset to truncate after consecutive zeros
+            data.datasets.forEach(dataset => {
+                // Step 1: Mark values outside opening hours as zero
+                for (let i = 0; i < dataset.data.length; i++) {
+                    const hour = i + 8; // Data starts at 8:00
+                    if (hour < openHour || hour >= closeHour) {
+                        dataset.data[i] = 0;
                     }
-                });
-            })
-            .catch(error => console.error('Error loading chart data:', error));
+                }
+                
+                // Step 2: Find and truncate after two consecutive zeros
+                let cutoffIndex = -1;
+                for (let i = 0; i < dataset.data.length - 1; i++) {
+                    if (dataset.data[i] === 0 && dataset.data[i + 1] === 0) {
+                        cutoffIndex = i;
+                        break;
+                    }
+                }
+                
+                // If we found consecutive zeros, truncate the array (keeping the first zero)
+                if (cutoffIndex !== -1) {
+                    // Keep data up to and including the first zero
+                    dataset.data = dataset.data.slice(0, cutoffIndex + 1);
+                    
+                    // Also truncate the corresponding points styling arrays we'll create
+                    dataset.cutoffIndex = cutoffIndex;
+                }
+            });
+            
+            return data;
+        }
+        
+        // Create or update chart with special handling for cutoff datasets
+        function createOrUpdateChart(data) {
+            const ctx = document.getElementById('seasonalityChart').getContext('2d');
+            const [openHour, closeHour] = data.opening_hours;
+            
+            // Generate unique colors and styles for each dataset
+            data.datasets.forEach((dataset, index) => {
+                const hue = (index * 137) % 360; // Golden angle approximation for color distribution
+                dataset.borderColor = `hsl(${hue}, 70%, 45%)`;
+                dataset.backgroundColor = `hsl(${hue}, 70%, 85%, 0.2)`;
+                dataset.tension = 0.3;
+                
+                // Initialize point styling arrays based on data length
+                const originalLength = data.labels.length;
+                dataset.pointStyle = new Array(originalLength).fill('circle');
+                dataset.pointRadius = new Array(originalLength).fill(3);
+                dataset.pointHoverRadius = new Array(originalLength).fill(5);
+                
+                // Style zero values specially
+                for (let i = 0; i < dataset.data.length; i++) {
+                    if (dataset.data[i] === 0) {
+                        dataset.pointRadius[i] = 0; // Hide zero points
+                        dataset.pointHoverRadius[i] = 0;
+                    }
+                }
+                
+                // If dataset was truncated, we need to "pad" it back to original length for Chart.js
+                if (dataset.hasOwnProperty('cutoffIndex')) {
+                    const paddingLength = originalLength - dataset.data.length;
+                    // Pad with null values (Chart.js will skip these)
+                    dataset.data = [
+                        ...dataset.data,
+                        ...Array(paddingLength).fill(null)
+                    ];
+                    // Remove property to avoid confusion
+                    delete dataset.cutoffIndex;
+                }
+            });
+            
+            // Destroy previous chart instance if exists
+            if (waitTimeChart) {
+                waitTimeChart.destroy();
+            }
+            
+            // Calculate the appropriate min and max hours for the x-axis
+            // Start at 8:00 AM for all days
+            const minHour = 8;
+            
+            // End exactly at the closing hour without extra padding
+            let maxHour = closeHour;  // No padding, show exactly to closing hour
+            if (maxHour < 17) maxHour = 17; // Minimum display range up to 17:00
+            if (maxHour > 21) maxHour = 21; // Maximum display range up to 21:00
+            
+            // Filter labels to only show the relevant range
+            const visibleLabels = data.labels.slice(0, maxHour - minHour + 1);
+            
+            // Create chart with adjusted x-axis
+            waitTimeChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: visibleLabels,
+                    datasets: data.datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                // Don't show tooltips for zero or null values
+                                label: function(context) {
+                                    if (context.raw === 0 || context.raw === null) {
+                                        return null;
+                                    }
+                                    return context.dataset.label + ': ' + context.raw + ' min';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 70, // Fix y-axis maximum at 70 minutes
+                            title: {
+                                display: true,
+                                text: '{{ translations[lang]["average_wait_time"] }}'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '{{ translations[lang]["time_of_day"] }}'
+                            },
+                            min: 0, // Start at the first visible label
+                            max: visibleLabels.length - 1 // End at the last visible label
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
 
-        // Updated Cookie consent functionality
+        // Existing cookie consent functionality
         document.addEventListener('DOMContentLoaded', function() {
             const cookieBanner = document.getElementById('cookie-consent');
             const acceptAllBtn = document.getElementById('cookie-accept-all');

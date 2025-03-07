@@ -181,10 +181,14 @@ class WaitTimeLib:
         """)
         return [(sid, name or 'Unknown', waittime, waiting) for sid, name, waittime, waiting in self.cursor.fetchall()]
 
-    def get_hourly_averages(self):
-        """Get average wait times in minutes by hour of day for each stadsloket"""
-        # PostgreSQL uses EXTRACT(HOUR FROM timestamp) instead of HOUR(timestamp)
-        self.cursor.execute("""
+    def get_hourly_averages(self, day_of_week=None):
+        """Get average wait times in minutes by hour of day for each stadsloket
+        
+        Args:
+            day_of_week (int, optional): Day of week (0=Sunday, 6=Saturday)
+                                        If None, returns data for all days
+        """
+        query = """
             SELECT 
                 wt.stadsloket_id,
                 ln.loket_name,
@@ -192,13 +196,26 @@ class WaitTimeLib:
                 AVG(wt.waittime::float) as avg_waittime
             FROM wait_times wt
             LEFT JOIN loket_names ln ON wt.stadsloket_id = ln.stadsloket_id
-            WHERE EXTRACT(HOUR FROM wt.timestamp) BETWEEN 8 AND 18
+            WHERE EXTRACT(HOUR FROM wt.timestamp) BETWEEN 8 AND 20
+        """
+        
+        # Add day of week filter if specified
+        if day_of_week is not None:
+            query += " AND EXTRACT(DOW FROM wt.timestamp) = %s"
+            params = (day_of_week,)
+        else:
+            params = ()
+            
+        query += """
             GROUP BY wt.stadsloket_id, ln.loket_name, EXTRACT(HOUR FROM wt.timestamp)
             ORDER BY wt.stadsloket_id, EXTRACT(HOUR FROM wt.timestamp)
-        """)
+        """
+        
+        self.cursor.execute(query, params)
         
         results = {}
-        hours = list(range(8, 19))  # 8:00 to 18:00
+        # Extended hours range to cover all possible opening hours (8:00 to 20:00)
+        hours = list(range(8, 21))  # 8:00 to 20:00
         
         for stadsloket_id, loket_name, hour, avg_waittime in self.cursor.fetchall():
             hour = int(hour)  # Convert from Decimal to int
@@ -212,11 +229,44 @@ class WaitTimeLib:
                 results[loket_name or f'Unknown-{stadsloket_id}']['data'][hour_index] = round(float(avg_waittime or 0), 1)
             except (ValueError, IndexError):
                 pass
-                
+        
+        # Return formatted data for chart
         return {
             'labels': [f"{h}:00" for h in hours],
-            'datasets': list(results.values())
+            'datasets': list(results.values()),
+            'day_of_week': day_of_week
         }
+
+    def get_opening_hours(self, day_of_week):
+        """Get opening hours based on day of week
+        
+        Args:
+            day_of_week (int): Day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+        
+        Returns:
+            tuple: (opening_hour, closing_hour)
+        """
+        # Make sure day_of_week is an integer
+        day = int(day_of_week) if day_of_week is not None else 0
+        
+        # Explicit mapping for clarity
+        if day == 0:  # Sunday
+            return (0, 0)  # Closed
+        elif day == 1:  # Monday
+            return (9, 17)
+        elif day == 2:  # Tuesday
+            return (9, 17)
+        elif day == 3:  # Wednesday
+            return (9, 17)
+        elif day == 4:  # Thursday - extended hours
+            return (9, 20)
+        elif day == 5:  # Friday
+            return (9, 17)
+        elif day == 6:  # Saturday
+            return (0, 0)  # Closed
+        else:
+            # Default fallback
+            return (9, 17)
 
     def get_last_update_time(self):
         """Get the timestamp of the most recent data update"""
