@@ -17,7 +17,7 @@ logging.basicConfig(
     format='%(asctime)s [%(levelname)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S %Z',
     handlers=[
-        logging.StreamHandler()  # Only use stream handler in production
+        logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
@@ -25,153 +25,129 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-# Create proper database configuration dictionary - FIX for string indices error
-db_config = {
-    'host': os.getenv('DB_HOST'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'database': os.getenv('DB_NAME')
-}
+# Use connection string for database
+db_url = os.getenv('DATABASE_URL')
 
-# Keep the connection string for WaitTimeLib if needed
-db_url = os.environ.get('DATABASE_URL')
-
-# Main application URL
+# App URLs
 APP_URL = 'https://stadsloket-wachtwijzer-amsterdam.nl'
 HEALTH_CHECK_PATH = '/health'
 
-# Define active hours (7:00 to 23:00)
-ACTIVE_HOURS_START = 7  # 7 AM
-ACTIVE_HOURS_END = 23   # 11 PM
+# Active hours (7:00 to 23:00)
+ACTIVE_HOURS_START = 7
+ACTIVE_HOURS_END = 23
 
 @contextmanager
 def wait_time_session():
-    """Context manager for handling database connections safely"""
+    """Safe database connection context manager"""
     wait_time = None
     try:
-        # Use the individual connection parameters if WaitTimeLib expects dictionary
-        # or use db_url if it expects a connection string
-        wait_time = WaitTimeLib(db_config)
+        wait_time = WaitTimeLib(db_url)
         yield wait_time
     except Exception as e:
-        logger.error(f"Database connection error: {e}")
+        logger.error(f"DB connection error: {e}")
         raise
     finally:
         if wait_time:
             wait_time.close()
 
 def collect_data():
-    """Collect and store data from the API"""
+    """Collect and store wait time data"""
     try:
-        logger.info("Starting data collection...")
+        logger.info("Collecting data...")
         
         with wait_time_session() as wait_time:
-            # Fetch and store new data
             data = wait_time.fetch_data()
             wait_time.store_data(data)
-            
-            # Update loket names periodically
             wait_time.fetch_loket_names()
             
-            logger.info(f"Successfully collected data for {len(data)} locations")
+            logger.info(f"Collected data for {len(data)} locations")
             
     except Exception as e:
-        logger.error(f"Error during data collection: {e}")
+        logger.error(f"Data collection error: {e}")
 
 def ping_server():
-    """Send a request to the app server to keep it awake"""
+    """Ping server to keep it awake"""
     try:
-        logger.info(f"Pinging server at {APP_URL}...")
+        logger.info(f"Pinging {APP_URL}...")
         start_time = time.time()
         
-        # Send request to the health check endpoint
         response = requests.get(f"{APP_URL}{HEALTH_CHECK_PATH}", timeout=10)
-        
-        # Calculate response time
         response_time = time.time() - start_time
         
         if response.status_code == 200:
-            logger.info(f"Server ping successful! Response time: {response_time:.2f}s")
+            logger.info(f"Ping successful ({response_time:.2f}s)")
             return True
         else:
-            logger.warning(f"Server responded with status code {response.status_code}")
+            logger.warning(f"Ping returned status code {response.status_code}")
             return False
             
     except requests.RequestException as e:
-        logger.error(f"Failed to ping server: {e}")
+        logger.error(f"Ping failed: {e}")
         return False
 
 def backup_ping():
-    """Send a request to the main URL if health check fails"""
+    """Fallback ping to main URL"""
     try:
-        logger.info(f"Attempting backup ping to {APP_URL}...")
+        logger.info(f"Trying backup ping to {APP_URL}...")
         response = requests.get(APP_URL, timeout=10)
         
         if response.status_code == 200:
-            logger.info("Backup ping successful!")
+            logger.info("Backup ping successful")
             return True
         else:
-            logger.warning(f"Backup ping failed with status code {response.status_code}")
+            logger.warning(f"Backup ping failed: status {response.status_code}")
             return False
             
     except requests.RequestException as e:
-        logger.error(f"Failed to send backup ping: {e}")
+        logger.error(f"Backup ping failed: {e}")
         return False
 
 def is_active_hours():
-    """Check if current time is within active hours (7:00-23:00)"""
-    current_time = datetime.now(amsterdam_tz)
-    current_hour = current_time.hour
+    """Check if current time is within active hours"""
+    current_hour = datetime.now(amsterdam_tz).hour
     return ACTIVE_HOURS_START <= current_hour < ACTIVE_HOURS_END
 
 def keep_server_awake():
-    """Keep the server awake by pinging it, but only during active hours"""
+    """Ping server during active hours to prevent sleep"""
     if not is_active_hours():
-        logger.info(f"Outside active hours ({ACTIVE_HOURS_START}:00-{ACTIVE_HOURS_END}:00), skipping server ping")
+        logger.info(f"Outside active hours ({ACTIVE_HOURS_START}-{ACTIVE_HOURS_END}), skipping ping")
         return False
     
-    logger.info(f"Within active hours ({ACTIVE_HOURS_START}:00-{ACTIVE_HOURS_END}:00), pinging server")
+    logger.info(f"Within active hours ({ACTIVE_HOURS_START}-{ACTIVE_HOURS_END}), pinging server")
     if not ping_server():
-        # If health check fails, try the main URL
         return backup_ping()
     return True
 
 def main():
-    """Main function to run the data collector"""
-    logger.info("Starting data collector service...")
-    logger.info(f"Server will only be pinged between {ACTIVE_HOURS_START}:00 and {ACTIVE_HOURS_END}:00 Amsterdam time")
+    """Main data collector service"""
+    logger.info("Starting data collector service")
+    logger.info(f"Active hours: {ACTIVE_HOURS_START}:00-{ACTIVE_HOURS_END}:00 Amsterdam time")
     
-    # Ensure database exists - FIX: Use db_config dictionary instead of db_url string
     try:
-        create_database(db_config)
+        create_database(db_url)
     except Exception as e:
-        logger.error(f"Failed to create database: {e}")
+        logger.error(f"Database setup failed: {e}")
         return
 
-    # Schedule data collection
+    # Schedule tasks
     schedule.every(15).minutes.do(collect_data)
-    
-    # Schedule server pings every 8 minutes to prevent sleep
-    # (less than the 10-minute inactivity threshold)
     schedule.every(8).minutes.do(keep_server_awake)
     
-    # Run immediately on startup
+    # Initial run
     collect_data()
-    # Only ping if within active hours
     if is_active_hours():
         keep_server_awake()
     
-    # Keep the script running
+    # Main loop
     while True:
         try:
             schedule.run_pending()
             time.sleep(1)
         except KeyboardInterrupt:
-            logger.info("Stopping data collector service...")
+            logger.info("Stopping data collector")
             break
         except Exception as e:
-            logger.error(f"Unexpected error: {e}")
-            # Wait a bit before retrying
+            logger.error(f"Error: {e}")
             time.sleep(60)
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ from contextlib import contextmanager
 import time
 from translations import translations
 
-# Load environment variables before anything else
+# Load environment variables
 load_dotenv()
 
 # Configure logging
@@ -18,16 +18,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Database configuration
-db_config = {
-    'host': os.getenv('DB_HOST'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'database': os.getenv('DB_NAME')
-}
+# Database connection string
+db_url = os.getenv('DATABASE_URL')
 
 def create_app():
-    """Application factory pattern"""
+    """Flask application factory"""
     app = Flask(__name__, static_folder='static', static_url_path='/static')
     
     # Config settings
@@ -39,14 +34,13 @@ def create_app():
         SESSION_COOKIE_SAMESITE='Lax',
     )
     
-    # Database connection context manager
     @contextmanager
     def get_db():
         """Database connection context manager"""
         wait_time_data = None
         try:
-            create_database(db_config)
-            wait_time_data = WaitTimeLib(db_config)
+            create_database(db_url)
+            wait_time_data = WaitTimeLib(db_url)
             yield wait_time_data
         except Exception as e:
             logger.error(f"Database error: {e}")
@@ -66,15 +60,14 @@ def create_app():
             ]
         }
     
-    # Request handlers
     @app.before_request
     def before_request():
-        """Log request info"""
+        """Track request start time"""
         request.start_time = time.time()
     
     @app.after_request
     def add_security_headers(response):
-        """Add security headers to response"""
+        """Add security headers and log request"""
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
         response.headers['X-XSS-Protection'] = '1; mode=block'
@@ -133,11 +126,9 @@ def create_app():
                 last_update = wait_time_data.get_last_update_time()
                 best_loket = min(current_data, key=lambda x: x[2]) if current_data else None
                 
-                # Get base URL for canonical link
+                # URLs for canonical and alternate language links
                 host = request.host_url.rstrip('/')
                 canonical_url = f"{host}{request.path}"
-                
-                # Add alternate language links
                 lang_urls = {
                     'nl': f"{host}{request.path}?lang=nl",
                     'en': f"{host}{request.path}?lang=en",
@@ -154,7 +145,7 @@ def create_app():
                                   lang_urls=lang_urls,
                                   translations=translations)
         except Exception as e:
-            logger.error(f"Error in index route: {e}")
+            logger.error(f"Index error: {e}")
             return render_template('index.html', 
                                   loket_data=[], 
                                   best_loket=None, 
@@ -189,7 +180,7 @@ def create_app():
     def health_check():
         try:
             with get_db() as wait_time_data:
-                # Simple query to check database connectivity
+                # Simple DB connectivity check
                 pass
             return jsonify({"status": "ok"}), 200
         except Exception as e:

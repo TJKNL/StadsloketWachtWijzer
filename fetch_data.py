@@ -1,17 +1,14 @@
 #%%
+import os
 from wait_time_data import create_database, WaitTimeLib
 
-db_config = {
-    'host': os.getenv('DB_HOST'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'database': os.getenv('DB_NAME')
-}
+# Use connection string
+db_url = os.getenv('DATABASE_URL')
 
-
-create_database(db_config)
+create_database(db_url)
 #%%
-wait_time_data = WaitTimeLib(db_config)
+# Initialize with connection string
+wait_time_data = WaitTimeLib(db_url)
 
 #%%
 wait_time_data.create_loket_names_table()

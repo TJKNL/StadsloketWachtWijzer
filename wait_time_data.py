@@ -1,33 +1,65 @@
 import requests
-import mysql.connector
+import psycopg2
+from psycopg2 import sql
+from psycopg2.extras import DictCursor
 import re
 from datetime import datetime
 import pytz
+from urllib.parse import urlparse
 
 def create_database(config):
-    """
-    Create the database if it doesn't exist.
-    This function accepts a dictionary configuration.
-    """
-    # We assume the database already exists since you mentioned it
-    # Just validate the config to make sure it's properly formatted
-    required_keys = ['host', 'user', 'password', 'database']
-    for key in required_keys:
-        if key not in config:
-            raise ValueError(f"Missing required configuration key: {key}")
-    
-    # If using connection string elsewhere, handle accordingly
-    return True
+    """Connect to PostgreSQL database using dict config or connection string."""
+    if isinstance(config, dict):
+        # Dictionary configuration
+        required_keys = ['host', 'user', 'password', 'database']
+        for key in required_keys:
+            if key not in config:
+                raise ValueError(f"Missing required key: {key}")
+        return True
+    elif isinstance(config, str):
+        # Connection string
+        try:
+            parsed = urlparse(config)
+            return {
+                'host': parsed.hostname,
+                'user': parsed.username,
+                'password': parsed.password,
+                'database': parsed.path[1:] if parsed.path else None,
+                'port': parsed.port or 5432
+            }
+        except Exception as e:
+            raise ValueError(f"Invalid database URL: {e}")
+    else:
+        raise ValueError("Config must be a dictionary or connection string")
 
 class WaitTimeLib:
     def __init__(self, config):
-        """Initialize database connection with config dictionary"""
-        self.host = config['host']
-        self.user = config['user']
-        self.password = config['password']
-        self.database = config['database']
-        self.db_config = config
-        self.db = mysql.connector.connect(**config)
+        """Initialize database connection from config dict or connection string"""
+        if isinstance(config, str):
+            self.connection_string = config
+            self.db = psycopg2.connect(config)
+            parsed = urlparse(config)
+            self.host = parsed.hostname
+            self.user = parsed.username
+            self.password = parsed.password
+            self.database = parsed.path[1:] if parsed.path else None
+        else:
+            self.host = config['host']
+            self.user = config['user']
+            self.password = config['password']
+            self.database = config['database']
+            self.db_config = config
+            conn_params = {
+                'host': self.host,
+                'user': self.user,
+                'password': self.password,
+                'dbname': self.database
+            }
+            if 'port' in config:
+                conn_params['port'] = config['port']
+            self.db = psycopg2.connect(**conn_params)
+        
+        self.db.autocommit = False
         self.cursor = self.db.cursor()
         self.timezone = pytz.timezone('Europe/Amsterdam')
         self.create_table()
@@ -35,26 +67,27 @@ class WaitTimeLib:
     def create_table(self):
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS wait_times (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            stadsloket_id INT NOT NULL,
-            waiting INT,
+            id SERIAL PRIMARY KEY,
+            stadsloket_id INTEGER NOT NULL,
+            waiting INTEGER,
             waittime VARCHAR(255),
-            timestamp DATETIME,
-            INDEX idx_stadsloket_id (stadsloket_id)
-        )
+            timestamp TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_stadsloket_id ON wait_times(stadsloket_id);
         """)
+        self.db.commit()
 
     def create_loket_names_table(self):
+        # PostgreSQL version of the table creation
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS loket_names (
-            stadsloket_id INT NOT NULL,
-            loket_name VARCHAR(255),
-            PRIMARY KEY (stadsloket_id),
-            CONSTRAINT fk_stadsloket
-                FOREIGN KEY (stadsloket_id)
-                REFERENCES wait_times(stadsloket_id)
-        )
+            stadsloket_id INTEGER NOT NULL PRIMARY KEY,
+            loket_name VARCHAR(255)
+        );
         """)
+        # Note: In PostgreSQL, we don't need to manually create the foreign key relationship
+        # here since we don't have all the records in wait_times yet
+        self.db.commit()
 
     def fetch_data(self):
         response = requests.get('https://wachttijdenamsterdam.nl/data/')
@@ -116,53 +149,59 @@ class WaitTimeLib:
         page_response = requests.get('https://wachttijdenamsterdam.nl')
         page_html = page_response.text
         # Simple regular expression to capture (stadsloket name) + (id from nfwrtXX)
-        # Each row has the pattern: <td data-title="Stadsloket"> X </td> ... id="nfwrtY"
+        # Each row has the pattern: <td data-title="Stadsloket">\s*(.*?)</td> ... id="nfwrtY"
         matches = re.findall(r'<td data-title="Stadsloket">\s*(.*?)</td>.*?id="nfwrt(\d+)"',
                              page_html, flags=re.DOTALL)
         # Create table if needed
         self.create_loket_names_table()
-        # Store results
+        # Store results - PostgreSQL uses ON CONFLICT instead of ON DUPLICATE KEY
         for (name, loket_id) in matches:
             self.cursor.execute("""
             INSERT INTO loket_names (stadsloket_id, loket_name)
             VALUES (%s, %s)
-            ON DUPLICATE KEY UPDATE
-                loket_name = VALUES(loket_name)
+            ON CONFLICT (stadsloket_id) 
+            DO UPDATE SET loket_name = EXCLUDED.loket_name
             """, (loket_id, name.strip()))
         self.db.commit()
 
     def get_current_waiting(self):
+        # PostgreSQL syntax for getting latest records
         self.cursor.execute("""
+            WITH latest_times AS (
+                SELECT stadsloket_id, MAX(timestamp) as max_timestamp
+                FROM wait_times
+                GROUP BY stadsloket_id
+            )
             SELECT wt.stadsloket_id, ln.loket_name, wt.waittime, wt.waiting
             FROM wait_times wt
+            JOIN latest_times lt 
+                ON wt.stadsloket_id = lt.stadsloket_id 
+                AND wt.timestamp = lt.max_timestamp
             LEFT JOIN loket_names ln ON wt.stadsloket_id = ln.stadsloket_id
-            WHERE wt.timestamp = (
-                SELECT MAX(timestamp)
-                FROM wait_times
-                WHERE stadsloket_id = wt.stadsloket_id
-            )
         """)
         return [(sid, name or 'Unknown', waittime, waiting) for sid, name, waittime, waiting in self.cursor.fetchall()]
 
     def get_hourly_averages(self):
         """Get average wait times in minutes by hour of day for each stadsloket"""
+        # PostgreSQL uses EXTRACT(HOUR FROM timestamp) instead of HOUR(timestamp)
         self.cursor.execute("""
             SELECT 
                 wt.stadsloket_id,
                 ln.loket_name,
-                HOUR(wt.timestamp) as hour_of_day,
-                AVG(wt.waittime) as avg_waittime
+                EXTRACT(HOUR FROM wt.timestamp) as hour_of_day,
+                AVG(wt.waittime::float) as avg_waittime
             FROM wait_times wt
             LEFT JOIN loket_names ln ON wt.stadsloket_id = ln.stadsloket_id
-            WHERE HOUR(wt.timestamp) BETWEEN 8 AND 18
-            GROUP BY wt.stadsloket_id, ln.loket_name, HOUR(wt.timestamp)
-            ORDER BY wt.stadsloket_id, HOUR(wt.timestamp)
+            WHERE EXTRACT(HOUR FROM wt.timestamp) BETWEEN 8 AND 18
+            GROUP BY wt.stadsloket_id, ln.loket_name, EXTRACT(HOUR FROM wt.timestamp)
+            ORDER BY wt.stadsloket_id, EXTRACT(HOUR FROM wt.timestamp)
         """)
         
         results = {}
         hours = list(range(8, 19))  # 8:00 to 18:00
         
         for stadsloket_id, loket_name, hour, avg_waittime in self.cursor.fetchall():
+            hour = int(hour)  # Convert from Decimal to int
             if loket_name not in results:
                 results[loket_name or f'Unknown-{stadsloket_id}'] = {
                     'label': loket_name or f'Unknown-{stadsloket_id}',
@@ -189,5 +228,7 @@ class WaitTimeLib:
         return result[0] if result and result[0] else None
 
     def close(self):
-        self.cursor.close()
-        self.db.close()
+        if hasattr(self, 'cursor') and self.cursor:
+            self.cursor.close()
+        if hasattr(self, 'db') and self.db:
+            self.db.close()
