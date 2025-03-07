@@ -47,7 +47,8 @@ translations = {
         'faq_q4_text': "Voor alle diensten is geen afspraak nodig, behalve bij het stadsloket in Weesp.",
         'faq_q5_title': "Wat zijn de openingstijden van de stadsloketten?",
         'faq_q5_text': "De meeste stadsloketten zijn open van maandag t/m vrijdag van 9:00 tot 17:00 uur. Op donderdag zijn ze open tot 20:00 uur. Op zaterdag en zondag zijn alle stadsloketten gesloten.",
-        'extended_hours': 'verlengde openingstijden'
+        'extended_hours': 'verlengde openingstijden',
+        'advertisement': 'Advertentie'
     },
     'en': {
         'hero_title': "Amsterdam City Offices Wait Times",
@@ -97,7 +98,8 @@ translations = {
         'faq_q4_text': "No appointment is required for most services; Weesp location still requires one.",
         'faq_q5_title': "What are the opening hours of the city offices?",
         'faq_q5_text': "Most city offices are open Monday to Friday from 9:00 to 17:00. On Thursdays, they're open until 20:00. All city offices are closed on Saturday and Sunday.",
-        'extended_hours': 'extended hours'
+        'extended_hours': 'extended hours',
+        'advertisement': 'Advertisement'
     },
     'tr': {
         'hero_title': "Amsterdam Şehir Ofisleri Bekleme Süreleri",
@@ -147,7 +149,8 @@ translations = {
         'faq_q4_text': "Çoğu işlem için randevuya gerek yoktur, ancak Weesp ofisi için gereklidir.",
         'faq_q5_title': "Şehir ofislerinin çalışma saatleri nelerdir?",
         'faq_q5_text': "Şehir ofisleri genellikle Pazartesi'den Cuma'ya 9:00 ile 17:00 arasında açıktır. Perşembe günleri 20:00'e kadar açıktır. Cumartesi ve Pazar günleri tüm şehir ofisleri kapalıdır.",
-        'extended_hours': 'uzatılmış saatler'
+        'extended_hours': 'uzatılmış saatler',
+        'advertisement': 'Reklam'
     },
     'ma': {
         'hero_title': "أوقات الانتظار في مكاتب مدينة أمستردام",
@@ -197,6 +200,7 @@ translations = {
         'faq_q4_text': "لا تحتاج إلى موعد لمعظم الخدمات؛ لا يزال يتعين عليك حجز موعد في مكتب Weesp.",
         'faq_q5_title': "ما هي ساعات عمل مكاتب المدينة؟",
         'faq_q5_text': "معظم مكاتب المدينة مفتوحة من الإثنين إلى الجمعة من الساعة 9:00 حتى 17:00. في أيام الخميس، تظل مفتوحة حتى الساعة 20:00. جميع مكاتب المدينة مغلقة يومي السبت والأحد.",
-        'extended_hours': 'ساعات ممتدة'
+        'extended_hours': 'ساعات ممتدة',
+        'advertisement': 'إعلان'
     }
 }

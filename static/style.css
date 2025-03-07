@@ -564,6 +564,26 @@ a:focus, button:focus {
     font-style: italic;
 }
 
+/* Ad container styling */
+.ad-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.ad-label {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #999;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
 @media (max-width: 768px) {
     .cookie-bento {
         left: 20px;
@@ -584,5 +604,13 @@ a:focus, button:focus {
     }
     .chart-responsive-wrapper {
         height: 60vh; /* Taller on mobile */
+    }
+}
+
+/* Responsive ad styling */
+@media (max-width: 768px) {
+    .ad-container {
+        padding: 0.5rem;
+        margin: 1rem auto;
     }
 }

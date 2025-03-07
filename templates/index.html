@@ -23,6 +23,18 @@
         
         <!-- Google AdSense -->
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4863672404977337" crossorigin="anonymous"></script>
+
+        <!-- Custom script to ensure ads load after content -->
+        <script>
+        // Ensure ads only load after page content
+        window.addEventListener('load', function() {
+            // This will be triggered once the entire page is fully loaded
+            var adElements = document.querySelectorAll('.adsbygoogle');
+            for (var i = 0; i < adElements.length; i++) {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            }
+        });
+        </script>
         
         <!-- Primary Meta Tags -->
         <meta charset="UTF-8">
@@ -226,6 +238,17 @@
     </div>
     {% endif %}
 
+    <!-- Ad placement between content sections - with clear labeling -->
+    <div class="ad-container">
+        <div class="ad-label">{{ translations[lang]['advertisement'] }}</div>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-4863672404977337"
+             data-ad-slot="4370543747"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+    </div>
+
     <div class="bento">
         {% for loket in loket_data %}
         <div>
@@ -255,6 +278,17 @@
         <div class="chart-responsive-wrapper">
             <canvas id="seasonalityChart"></canvas>
         </div>
+    </div>
+
+    <!-- Second ad placement within content - with clear labeling -->
+    <div class="ad-container">
+        <div class="ad-label">{{ translations[lang]['advertisement'] }}</div>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-4863672404977337"
+             data-ad-slot="4370543747"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
     </div>
     
     <!-- FAQ Section - Updated to match bento box style -->
