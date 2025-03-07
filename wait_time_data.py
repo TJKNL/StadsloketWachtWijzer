@@ -71,7 +71,7 @@ class WaitTimeLib:
             stadsloket_id INTEGER NOT NULL,
             waiting INTEGER,
             waittime VARCHAR(255),
-            timestamp TIMESTAMP
+            timestamp TIMESTAMP WITH TIME ZONE
         );
         CREATE INDEX IF NOT EXISTS idx_stadsloket_id ON wait_times(stadsloket_id);
         """)
@@ -108,7 +108,7 @@ class WaitTimeLib:
     def store_data(self, data):
         for entry in data:
             parsed_waittime = self.parse_waittime(entry['waittime'])
-            # Get current time in Amsterdam timezone
+            # Get current time in Amsterdam timezone with explicit timezone info
             current_time = datetime.now(self.timezone)
             self.cursor.execute("""
             INSERT INTO wait_times (stadsloket_id, waiting, waittime, timestamp)
@@ -192,23 +192,23 @@ class WaitTimeLib:
             SELECT 
                 wt.stadsloket_id,
                 ln.loket_name,
-                EXTRACT(HOUR FROM wt.timestamp) as hour_of_day,
+                EXTRACT(HOUR FROM wt.timestamp AT TIME ZONE 'Europe/Amsterdam') as hour_of_day,
                 AVG(wt.waittime::float) as avg_waittime
             FROM wait_times wt
             LEFT JOIN loket_names ln ON wt.stadsloket_id = ln.stadsloket_id
-            WHERE EXTRACT(HOUR FROM wt.timestamp) BETWEEN 8 AND 20
+            WHERE EXTRACT(HOUR FROM wt.timestamp AT TIME ZONE 'Europe/Amsterdam') BETWEEN 8 AND 20
         """
         
         # Add day of week filter if specified
         if day_of_week is not None:
-            query += " AND EXTRACT(DOW FROM wt.timestamp) = %s"
+            query += " AND EXTRACT(DOW FROM wt.timestamp AT TIME ZONE 'Europe/Amsterdam') = %s"
             params = (day_of_week,)
         else:
             params = ()
             
         query += """
-            GROUP BY wt.stadsloket_id, ln.loket_name, EXTRACT(HOUR FROM wt.timestamp)
-            ORDER BY wt.stadsloket_id, EXTRACT(HOUR FROM wt.timestamp)
+            GROUP BY wt.stadsloket_id, ln.loket_name, EXTRACT(HOUR FROM wt.timestamp AT TIME ZONE 'Europe/Amsterdam')
+            ORDER BY wt.stadsloket_id, EXTRACT(HOUR FROM wt.timestamp AT TIME ZONE 'Europe/Amsterdam')
         """
         
         self.cursor.execute(query, params)
