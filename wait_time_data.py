@@ -61,6 +61,9 @@ class WaitTimeLib:
         
         self.db.autocommit = False
         self.cursor = self.db.cursor()
+        # Set PostgreSQL session timezone to Amsterdam
+        self.cursor.execute("SET timezone = 'Europe/Amsterdam';")
+        
         self.timezone = pytz.timezone('Europe/Amsterdam')
         self.create_table()
         
@@ -276,6 +279,25 @@ class WaitTimeLib:
         """)
         result = self.cursor.fetchone()
         return result[0] if result and result[0] else None
+
+    def debug_timezone(self):
+        """Debug timezone settings and timestamp display"""
+        self.cursor.execute("SHOW timezone;")
+        db_timezone = self.cursor.fetchone()[0]
+        
+        self.cursor.execute("SELECT NOW(), NOW() AT TIME ZONE 'Europe/Amsterdam';")
+        db_now, amsterdam_now = self.cursor.fetchone()
+        
+        self.cursor.execute("SELECT MAX(timestamp), MAX(timestamp) AT TIME ZONE 'Europe/Amsterdam' FROM wait_times;")
+        latest_ts, latest_ts_ams = self.cursor.fetchone()
+        
+        return {
+            "db_timezone": db_timezone,
+            "db_now": db_now,
+            "amsterdam_now": amsterdam_now,
+            "latest_timestamp": latest_ts,
+            "latest_timestamp_ams": latest_ts_ams
+        }
 
     def close(self):
         if hasattr(self, 'cursor') and self.cursor:
