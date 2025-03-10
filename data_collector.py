@@ -36,6 +36,10 @@ HEALTH_CHECK_PATH = '/health'
 ACTIVE_HOURS_START = 7
 ACTIVE_HOURS_END = 23
 
+# Data collection restriction hours (avoid DB writes between 8:00-21:00)
+NO_COLLECT_START = 8
+NO_COLLECT_END = 21
+
 @contextmanager
 def wait_time_session():
     """Safe database connection context manager"""
@@ -50,9 +54,24 @@ def wait_time_session():
         if wait_time:
             wait_time.close()
 
+def is_active_hours():
+    """Check if current time is within active hours"""
+    current_hour = datetime.now(amsterdam_tz).hour
+    return ACTIVE_HOURS_START <= current_hour < ACTIVE_HOURS_END
+
+def is_collection_allowed():
+    """Check if data collection is currently allowed (outside 8:00-21:00)"""
+    current_hour = datetime.now(amsterdam_tz).hour
+    return current_hour < NO_COLLECT_START or current_hour >= NO_COLLECT_END
+
 def collect_data():
-    """Collect and store wait time data"""
+    """Collect and store wait time data if allowed"""
     try:
+        # Check if collection is currently allowed
+        if not is_collection_allowed():
+            logger.info(f"Data collection skipped - within restricted hours ({NO_COLLECT_START}:00-{NO_COLLECT_END}:00)")
+            return
+        
         logger.info("Collecting data...")
         
         with wait_time_session() as wait_time:
@@ -102,11 +121,6 @@ def backup_ping():
         logger.error(f"Backup ping failed: {e}")
         return False
 
-def is_active_hours():
-    """Check if current time is within active hours"""
-    current_hour = datetime.now(amsterdam_tz).hour
-    return ACTIVE_HOURS_START <= current_hour < ACTIVE_HOURS_END
-
 def keep_server_awake():
     """Ping server during active hours to prevent sleep"""
     if not is_active_hours():
@@ -122,6 +136,7 @@ def main():
     """Main data collector service"""
     logger.info("Starting data collector service")
     logger.info(f"Active hours: {ACTIVE_HOURS_START}:00-{ACTIVE_HOURS_END}:00 Amsterdam time")
+    logger.info(f"Data collection restricted between: {NO_COLLECT_START}:00-{NO_COLLECT_END}:00 Amsterdam time")
     
     try:
         create_database(db_url)
@@ -133,8 +148,12 @@ def main():
     schedule.every(15).minutes.do(collect_data)
     schedule.every(8).minutes.do(keep_server_awake)
     
-    # Initial run
-    collect_data()
+    # Initial run - only if collection is allowed
+    if is_collection_allowed():
+        collect_data()
+    else:
+        logger.info(f"Initial data collection skipped - within restricted hours ({NO_COLLECT_START}:00-{NO_COLLECT_END}:00)")
+        
     if is_active_hours():
         keep_server_awake()
     
