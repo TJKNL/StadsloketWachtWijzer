@@ -24,15 +24,11 @@
         <!-- Google AdSense -->
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4863672404977337" crossorigin="anonymous"></script>
 
-        <!-- Custom script to ensure ads load after content -->
+        <!-- AdSense initialization -->
         <script>
-        // Ensure ads only load after page content
         window.addEventListener('load', function() {
-            // This will be triggered once the entire page is fully loaded
-            var adElements = document.querySelectorAll('.adsbygoogle');
-            for (var i = 0; i < adElements.length; i++) {
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            }
+            // AdSense auto-initialization is preferred over manual initialization
+            console.log('Page loaded - AdSense ready');
         });
         </script>
         
@@ -55,10 +51,8 @@
         <meta name="keywords" content="wachttijden stadsloketten Amsterdam, Amsterdam stadsloket wachtrij, gemeente Amsterdam wachttijd, actuele wachtrijen stadsloketten, wachttijden gemeente Amsterdam">
         <meta name="author" content="Twan Kerkhof">
         
-        <!-- Canonical URL - Adding this to help search engines understand this is the main page -->
+        <!-- Canonical URL and Language alternates -->
         <link rel="canonical" href="{{ request.url_root }}" />
-        
-        <!-- Language alternates for SEO -->
         <link rel="alternate" hreflang="nl" href="{{ request.url_root }}?lang=nl" />
         <link rel="alternate" hreflang="en" href="{{ request.url_root }}?lang=en" />
         <link rel="alternate" hreflang="tr" href="{{ request.url_root }}?lang=tr" />
@@ -67,7 +61,6 @@
         
         <!-- Viewport and Favicon -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- Enhanced Favicon Support for Search Results -->
         <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
         <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
@@ -116,7 +109,7 @@
         }
         </script>
         
-        <!-- Preconnect to CDNs -->
+        <!-- Resource preconnection -->
         <link rel="preconnect" href="https://cdnjs.cloudflare.com">
         <link rel="preconnect" href="https://cdn.jsdelivr.net">
         
@@ -124,7 +117,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         
-        <!-- Scripts -->
+        <!-- External libraries -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js" defer></script>
         
         <!-- Cache control -->
@@ -156,6 +149,7 @@
         </script>
     </head>
 <body>
+    <!-- Language switcher -->
     <div class="language-switcher">
         {% for code, label, flag in supported_languages %}
             <a href="?lang={{ code }}">
@@ -163,18 +157,17 @@
             </a>
         {% endfor %}
     </div>
-    <!-- Simplified Cookie Consent Banner -->
+
+    <!-- Cookie consent banner -->
     <div id="cookie-consent" class="cookie-bento">
         <h3><i class="fas fa-cookie-bite"></i> {{ translations[lang]['cookie_banner_title'] }}</h3>
         <p>{{ translations[lang]['cookie_banner_text'] }}</p>
         
-        <!-- Initial buttons - simplified UI -->
         <div id="consent-initial-buttons" class="cookie-buttons">
             <button id="cookie-accept-all" class="cookie-btn accept">{{ translations[lang]['cookie_accept_button'] }}</button>
             <button id="show-more-options" class="cookie-btn options">{{ translations[lang]['cookie_more_options'] }}</button>
         </div>
         
-        <!-- Advanced options (hidden by default) -->
         <div id="consent-advanced" class="consent-advanced" style="display: none;">
             <div class="consent-choices">
                 <div class="consent-option">
@@ -198,6 +191,7 @@
         <a href="{{ url_for('privacy') }}" class="cookie-policy-link">{{ translations[lang]['cookie_more_info'] }}</a>
     </div>
 
+    <!-- Hero section -->
     <header class="hero">
         <div class="hero-content">
             <h1>{{ translations[lang]['hero_title'] }}</h1>
@@ -208,7 +202,7 @@
         </div>
     </header>
     
-    <!-- Breadcrumb navigation for SEO - Updated to match site style -->
+    <!-- Breadcrumb navigation -->
     <div class="breadcrumb">
         <div class="content-container">
             <span>
@@ -218,7 +212,7 @@
         </div>
     </div>
 
-    <!-- Add the last updated information below the header -->
+    <!-- Data status section -->
     <div class="data-status">
         {% if last_update %}
         <p><i class="fas fa-sync-alt"></i> Data last updated: {{ last_update.strftime('%Y-%m-%d %H:%M:%S') }}</p>
@@ -227,18 +221,19 @@
         {% endif %}
     </div>
 
+    <!-- Recommended location section -->
     {% if best_loket %}
     <div class="bento">
         <div class="best-loket">
             <h2><i class="fas fa-star"></i> {{ translations[lang]['card_recommended_location'] }}</h2>
             <p><i class="fas fa-building"></i> {{ best_loket[1] }}</p>
             <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ best_loket[2] }} minutes</p>
-            <p><i class="fas fa-users"></i> {{ translations[lang]['card_currently_waiting'] }}: {{ best_loket[3] }} people</p>
+            <p><i class="fas fa-users'></i> {{ translations[lang]['card_currently_waiting'] }}: {{ best_loket[3] }} people</p>
         </div>
     </div>
     {% endif %}
 
-    <!-- Ad placement between content sections - with clear labeling -->
+    <!-- Advertisement section -->
     <div class="ad-container">
         <div class="ad-label">{{ translations[lang]['advertisement'] }}</div>
         <ins class="adsbygoogle"
@@ -249,6 +244,7 @@
              data-full-width-responsive="true"></ins>
     </div>
 
+    <!-- Location data grid -->
     <div class="bento">
         {% for loket in loket_data %}
         <div>
@@ -259,12 +255,11 @@
         {% endfor %}
     </div>
     
-    <!-- Daily Seasonality Chart Section -->
+    <!-- Seasonality chart section -->
     <div class="chart-container">
         <h2>{{ translations[lang]['plot_title'] }}</h2>
         <p>{{ translations[lang]['plot_subtitle'] }}</p>
         
-        <!-- Day of Week Selector -->
         <div class="day-selector">
             <button class="day-button" data-day="1">{{ translations[lang]['day_monday'] }}</button>
             <button class="day-button" data-day="2">{{ translations[lang]['day_tuesday'] }}</button>
@@ -280,7 +275,7 @@
         </div>
     </div>
 
-    <!-- Second ad placement within content - with clear labeling -->
+    <!-- Second advertisement section -->
     <div class="ad-container">
         <div class="ad-label">{{ translations[lang]['advertisement'] }}</div>
         <ins class="adsbygoogle"
@@ -291,7 +286,7 @@
              data-full-width-responsive="true"></ins>
     </div>
     
-    <!-- FAQ Section - Updated to match bento box style -->
+    <!-- FAQ section -->
     <section class="faq-section">
         <h2>{{ translations[lang]['faq_title'] }}</h2>
         
@@ -316,7 +311,6 @@
                 <p>{{ translations[lang]['faq_q4_text'] }}</p>
             </div>
             
-            <!-- New FAQ item for opening hours -->
             <div class="faq-item">
                 <h3><i class="fas fa-door-open"></i> {{ translations[lang]['faq_q5_title'] }}</h3>
                 <p>{{ translations[lang]['faq_q5_text'] }}</p>
@@ -324,15 +318,16 @@
         </div>
     </section>
     
+    <!-- App JavaScript -->
     <script>
         // Chart instance variable
         let waitTimeChart = null;
         
         // Current day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
         const currentDate = new Date();
-        let currentDay = currentDate.getDay(); // JavaScript's getDay() returns 0=Sunday, 6=Saturday
+        let currentDay = currentDate.getDay();
         
-        // If it's a weekend, default to Monday (day 1)
+        // Default to Monday if it's a weekend
         if (currentDay === 0 || currentDay === 6) {
             currentDay = 1;
         }
@@ -348,16 +343,19 @@
             "{{ translations[lang]['day_saturday'] }}"
         ];
         
-        // Set the initial active day button
+        /**
+         * Initialize day selector and load initial chart data
+         */
         document.addEventListener('DOMContentLoaded', function() {
-            // Set the initial active button
             const dayButtons = document.querySelectorAll('.day-button');
+            
+            // Set initial active button
             dayButtons.forEach(button => {
                 if (parseInt(button.dataset.day) === currentDay) {
                     button.classList.add('active');
                 }
                 
-                // Add click event
+                // Add click event handler
                 button.addEventListener('click', function() {
                     dayButtons.forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
@@ -365,53 +363,59 @@
                 });
             });
             
-            // Initial chart load
+            // Load initial chart data
             loadChartData(currentDay);
         });
         
-        // Load chart data for specific day
+        /**
+         * Load chart data for a specific day
+         * @param {number} day - Day of week (0-6)
+         */
         function loadChartData(day) {
             fetch(`/hourly_data?day=${day}`)
                 .then(response => response.json())
                 .then(data => {
-                    // Update opening hours note
                     updateOpeningHoursNote(data.opening_hours, day);
-                    
-                    // Apply zero values outside opening hours
                     applyOpeningHoursFilter(data);
-                    
                     createOrUpdateChart(data);
                 })
                 .catch(error => console.error('Error loading chart data:', error));
         }
         
-        // Update opening hours note with more explicit weekend messaging
+        /**
+         * Update opening hours message
+         * @param {Array} hours - Opening and closing hours
+         * @param {number} day - Day of week
+         */
         function updateOpeningHoursNote(hours, day) {
             const openingHoursNote = document.getElementById('opening-hours-note');
             const [openHour, closeHour] = hours;
             
-            console.log(`Day ${day}: hours ${openHour}-${closeHour}`); // Debug logging
-            
             if (openHour === 0 && closeHour === 0) {
                 // Closed (weekends)
                 openingHoursNote.textContent = `${dayNames[day]}: {{ translations[lang]['closed'] }}`;
-                openingHoursNote.style.color = "#E32E35"; // Make closed days more noticeable
-            } else if (closeHour === 20) { // Extended hours detected (specifically for Thursday)
+                openingHoursNote.style.color = "#E32E35";
+            } else if (closeHour === 20) {
+                // Extended hours (Thursday)
                 openingHoursNote.textContent = `${dayNames[day]}: {{ translations[lang]['open_from'] }} ${openHour}:00 {{ translations[lang]['until'] }} ${closeHour}:00 ({{ translations[lang]['extended_hours'] }})`;
                 openingHoursNote.style.color = "#666";
             } else {
+                // Normal hours
                 openingHoursNote.textContent = `${dayNames[day]}: {{ translations[lang]['open_from'] }} ${openHour}:00 {{ translations[lang]['until'] }} ${closeHour}:00`;
                 openingHoursNote.style.color = "#666";
             }
         }
         
-        // Apply zero values outside opening hours - improved approach
+        /**
+         * Apply zero values outside opening hours and truncate datasets
+         * @param {Object} data - Chart data object
+         * @return {Object} Modified data object
+         */
         function applyOpeningHoursFilter(data) {
             const [openHour, closeHour] = data.opening_hours;
             
-            // Process each dataset to truncate after consecutive zeros
             data.datasets.forEach(dataset => {
-                // Step 1: Mark values outside opening hours as zero
+                // Mark values outside opening hours as zero
                 for (let i = 0; i < dataset.data.length; i++) {
                     const hour = i + 8; // Data starts at 8:00
                     if (hour < openHour || hour >= closeHour) {
@@ -419,7 +423,7 @@
                     }
                 }
                 
-                // Step 2: Find and truncate after two consecutive zeros
+                // Find and truncate after two consecutive zeros
                 let cutoffIndex = -1;
                 for (let i = 0; i < dataset.data.length - 1; i++) {
                     if (dataset.data[i] === 0 && dataset.data[i + 1] === 0) {
@@ -428,12 +432,9 @@
                     }
                 }
                 
-                // If we found consecutive zeros, truncate the array (keeping the first zero)
+                // Truncate if needed
                 if (cutoffIndex !== -1) {
-                    // Keep data up to and including the first zero
                     dataset.data = dataset.data.slice(0, cutoffIndex + 1);
-                    
-                    // Also truncate the corresponding points styling arrays we'll create
                     dataset.cutoffIndex = cutoffIndex;
                 }
             });
@@ -441,63 +442,61 @@
             return data;
         }
         
-        // Create or update chart with special handling for cutoff datasets
+        /**
+         * Create or update the wait time chart
+         * @param {Object} data - Chart data object
+         */
         function createOrUpdateChart(data) {
             const ctx = document.getElementById('seasonalityChart').getContext('2d');
             const [openHour, closeHour] = data.opening_hours;
             
-            // Generate unique colors and styles for each dataset
+            // Style datasets
             data.datasets.forEach((dataset, index) => {
-                const hue = (index * 137) % 360; // Golden angle approximation for color distribution
+                const hue = (index * 137) % 360;
                 dataset.borderColor = `hsl(${hue}, 70%, 45%)`;
                 dataset.backgroundColor = `hsl(${hue}, 70%, 85%, 0.2)`;
                 dataset.tension = 0.3;
                 
-                // Initialize point styling arrays based on data length
+                // Point styling
                 const originalLength = data.labels.length;
                 dataset.pointStyle = new Array(originalLength).fill('circle');
                 dataset.pointRadius = new Array(originalLength).fill(3);
                 dataset.pointHoverRadius = new Array(originalLength).fill(5);
                 
-                // Style zero values specially
+                // Hide zero points
                 for (let i = 0; i < dataset.data.length; i++) {
                     if (dataset.data[i] === 0) {
-                        dataset.pointRadius[i] = 0; // Hide zero points
+                        dataset.pointRadius[i] = 0;
                         dataset.pointHoverRadius[i] = 0;
                     }
                 }
                 
-                // If dataset was truncated, we need to "pad" it back to original length for Chart.js
+                // Pad truncated datasets for Chart.js
                 if (dataset.hasOwnProperty('cutoffIndex')) {
                     const paddingLength = originalLength - dataset.data.length;
-                    // Pad with null values (Chart.js will skip these)
                     dataset.data = [
                         ...dataset.data,
                         ...Array(paddingLength).fill(null)
                     ];
-                    // Remove property to avoid confusion
                     delete dataset.cutoffIndex;
                 }
             });
             
-            // Destroy previous chart instance if exists
+            // Destroy previous chart if exists
             if (waitTimeChart) {
                 waitTimeChart.destroy();
             }
             
-            // Calculate the appropriate min and max hours for the x-axis
-            // Start at 8:00 AM for all days
+            // Calculate axis limits
             const minHour = 8;
+            let maxHour = closeHour;
+            if (maxHour < 17) maxHour = 17;
+            if (maxHour > 21) maxHour = 21;
             
-            // End exactly at the closing hour without extra padding
-            let maxHour = closeHour;  // No padding, show exactly to closing hour
-            if (maxHour < 17) maxHour = 17; // Minimum display range up to 17:00
-            if (maxHour > 21) maxHour = 21; // Maximum display range up to 21:00
-            
-            // Filter labels to only show the relevant range
+            // Filter labels to show relevant range
             const visibleLabels = data.labels.slice(0, maxHour - minHour + 1);
             
-            // Create chart with adjusted x-axis
+            // Create chart
             waitTimeChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -515,7 +514,6 @@
                             mode: 'index',
                             intersect: false,
                             callbacks: {
-                                // Don't show tooltips for zero or null values
                                 label: function(context) {
                                     if (context.raw === 0 || context.raw === null) {
                                         return null;
@@ -528,7 +526,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            suggestedMax: 70, // Fix y-axis maximum at 70 minutes
+                            suggestedMax: 70,
                             title: {
                                 display: true,
                                 text: '{{ translations[lang]["average_wait_time"] }}'
@@ -539,8 +537,8 @@
                                 display: true,
                                 text: '{{ translations[lang]["time_of_day"] }}'
                             },
-                            min: 0, // Start at the first visible label
-                            max: visibleLabels.length - 1 // End at the last visible label
+                            min: 0,
+                            max: visibleLabels.length - 1
                         }
                     },
                     interaction: {
@@ -552,7 +550,9 @@
             });
         }
 
-        // Existing cookie consent functionality
+        /**
+         * Cookie consent management
+         */
         document.addEventListener('DOMContentLoaded', function() {
             const cookieBanner = document.getElementById('cookie-consent');
             const acceptAllBtn = document.getElementById('cookie-accept-all');
@@ -572,18 +572,13 @@
             
             // Check for existing consent
             function checkConsent() {
-                // Parse consent cookie if it exists
-                let consentSettings = {};
                 const consentCookie = document.cookie.split(';').find(c => c.trim().startsWith('consent_settings='));
                 
                 if (consentCookie) {
                     try {
-                        consentSettings = JSON.parse(decodeURIComponent(consentCookie.split('=')[1]));
+                        const consentSettings = JSON.parse(decodeURIComponent(consentCookie.split('=')[1]));
                         cookieBanner.style.display = 'none';
-                        
-                        // Apply saved consent settings
                         updateConsentState(consentSettings);
-                        
                         return true;
                     } catch (e) {
                         console.error('Error parsing consent cookie:', e);
@@ -602,14 +597,10 @@
             
             // Save consent choices
             function saveConsent(settings) {
-                // Save consent settings as JSON in a cookie (1 year expiry)
                 document.cookie = 'consent_settings=' + encodeURIComponent(JSON.stringify(settings)) + 
                     '; max-age=' + (86400 * 365) + '; path=/; SameSite=Lax';
                 
-                // Update Google Consent settings
                 updateConsentState(settings);
-                
-                // Hide consent banner
                 cookieBanner.style.display = 'none';
             }
             
@@ -620,7 +611,6 @@
             
             // Event handlers
             acceptAllBtn.addEventListener('click', function() {
-                // Grant all consents
                 saveConsent({
                     analytics: true,
                     ads: true
@@ -628,7 +618,6 @@
             });
             
             rejectAllBtn.addEventListener('click', function() {
-                // Deny all consents
                 saveConsent({
                     analytics: false,
                     ads: false
@@ -636,7 +625,6 @@
             });
             
             customizeBtn.addEventListener('click', function() {
-                // Save customized choices
                 saveConsent({
                     analytics: analyticsCheckbox.checked,
                     ads: adsCheckbox.checked
@@ -645,6 +633,7 @@
         });
     </script>
 
+    <!-- Footer -->
     <footer class="footer">
         <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time wachttijden stadsloketten Amsterdam</p>
         <p style="color: #999;">Deze website is een onafhankelijk initiatief en heeft geen officiële relatie met de gemeente Amsterdam.</p>
