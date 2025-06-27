@@ -614,3 +614,410 @@ a:focus, button:focus {
         margin: 1rem auto;
     }
 }
+
+/* Travel time feature styles */
+.travel-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.travel-info i {
+    color: #3498db;
+}
+
+.combined-time {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.combined-time i {
+    color: #9b59b6;
+}
+
+.location-section {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.location-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.location-btn:hover {
+    background-color: #2980b9;
+}
+
+.location-btn:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+.location-status {
+    margin-top: 10px;
+    color: #e74c3c;
+}
+
+.best-combined {
+    border-left: 4px solid #3498db;
+}
+
+/* Streamlined UI styles */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.quick-action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 20px 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.location-btn, .action-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.location-btn:hover, .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.action-btn {
+    background-color: #f1f1f1;
+    color: #444;
+}
+
+.recommendation-container {
+    margin: 25px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.best-loket-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid var(--amsterdam-red);
+}
+
+.recommendation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.recommendation-header h2 {
+    color: var(--amsterdam-red);
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.badge {
+    background-color: var(--amsterdam-red);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.recommendation-body h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.6rem;
+    color: #333;
+}
+
+.stats-container {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-item i {
+    font-size: 1.5rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.stat-item.primary i {
+    color: var(--amsterdam-red);
+}
+
+.stat-item .value {
+    font-size: 2rem;
+    font-weight: bold;
+    line-height: 1;
+    color: #333;
+}
+
+.stat-item.primary .value {
+    color: var(--amsterdam-red);
+}
+
+.stat-item .label {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.map-container {
+    margin: 25px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.locations-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 30px 0 15px;
+}
+
+.locations-header h2 {
+    margin: 0;
+    color: #333;
+}
+
+.list-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.sort-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.sort-btn.active {
+    background-color: #f1f1f1;
+    font-weight: bold;
+}
+
+.location-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.location-card {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.location-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.location-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wait-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wait-time {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+}
+
+.wait-time .value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--amsterdam-red);
+}
+
+.wait-time .unit {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.people-waiting {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.travel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.travel-info i {
+    width: 18px;
+    color: #3498db;
+}
+
+.total-time {
+    font-weight: bold;
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    color: #3498db;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 auto 30px;
+}
+
+.toggle-btn:hover {
+    text-decoration: underline;
+}
+
+.faq-toggle {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.faq-accordion {
+    margin-top: 20px;
+}
+
+.faq-item {
+    margin-bottom: 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.faq-question {
+    padding: 15px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.faq-question h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.faq-answer {
+    padding: 0 15px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.faq-answer p {
+    margin: 15px 0;
+}
+
+.chart-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 25px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.chart-section h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stats-container {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .stat-item {
+        flex-direction: row;
+        gap: 10px;
+    }
+    
+    .stat-item .value {
+        font-size: 1.5rem;
+    }
+    
+    .location-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .locations-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

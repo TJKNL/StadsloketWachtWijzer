@@ -119,10 +119,28 @@ def create_app():
     @app.route('/', methods=['GET'])
     def index():
         lang = request.args.get('lang', 'nl')
+        # Check if user provided location
+        user_lat = request.args.get('lat')
+        user_lon = request.args.get('lon')
+        has_location = user_lat and user_lon
         
         try:
+            if has_location:
+                # Convert to float
+                user_lat = float(user_lat)
+                user_lon = float(user_lon)
+                
             with get_db() as wait_time_data:
-                current_data = wait_time_data.get_current_waiting()
+                if has_location:
+                    current_data = wait_time_data.get_current_waiting(user_lat, user_lon)
+                    # Get office with best combined wait+travel time
+                    combined_data = wait_time_data.get_combined_wait_and_travel_time(user_lat, user_lon)
+                    best_combined = combined_data[0] if combined_data else None
+                else:
+                    current_data = wait_time_data.get_current_waiting()
+                    combined_data = None
+                    best_combined = None
+                    
                 last_update = wait_time_data.get_last_update_time()
                 best_loket = min(current_data, key=lambda x: x[2]) if current_data else None
                 
@@ -139,6 +157,9 @@ def create_app():
             return render_template('index.html', 
                                   loket_data=current_data, 
                                   best_loket=best_loket,
+                                  best_combined=best_combined,
+                                  combined_data=combined_data,
+                                  has_location=has_location,
                                   last_update=last_update,
                                   canonical_url=canonical_url,
                                   lang=lang,
@@ -149,6 +170,9 @@ def create_app():
             return render_template('index.html', 
                                   loket_data=[], 
                                   best_loket=None, 
+                                  best_combined=None,
+                                  combined_data=None,
+                                  has_location=False,
                                   last_update=None,
                                   error="Unable to fetch data",
                                   canonical_url=request.url,
@@ -219,6 +243,106 @@ def create_app():
         except Exception as e:
             logger.error(f"Health check failed: {e}")
             return jsonify({"status": "error", "message": str(e)}), 500
+    
+    # New endpoints for location-based features
+    @app.route('/api/offices', methods=['GET'])
+    def get_office_locations():
+        """Return all office locations"""
+        try:
+            from location_service import get_all_office_locations
+            return jsonify(get_all_office_locations())
+        except Exception as e:
+            logger.error(f"Error getting office locations: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/api/travel-times', methods=['GET'])
+    def get_travel_times():
+        """Calculate travel times from user location to all offices"""
+        try:
+            user_lat = request.args.get('lat')
+            user_lon = request.args.get('lon')
+            
+            if not (user_lat and user_lon):
+                return jsonify({"error": "Missing location parameters"}), 400
+                
+            # Convert to float
+            user_lat = float(user_lat)
+            user_lon = float(user_lon)
+            
+            from location_service import calculate_travel_times
+            travel_times = calculate_travel_times(user_lat, user_lon)
+            
+            return jsonify(travel_times)
+        except Exception as e:
+            logger.error(f"Error calculating travel times: {e}")
+            return jsonify({"error": str(e)}), 500
+            
+    @app.route('/api/combined-times', methods=['GET'])
+    def get_combined_times():
+        """Get combined wait and travel times for all offices"""
+        try:
+            user_lat = request.args.get('lat')
+            user_lon = request.args.get('lon')
+            
+            if not (user_lat and user_lon):
+                return jsonify({"error": "Missing location parameters"}), 400
+                
+            # Convert to float
+            user_lat = float(user_lat)
+            user_lon = float(user_lon)
+            
+            with get_db() as wait_time_data:
+                combined_data = wait_time_data.get_combined_wait_and_travel_time(user_lat, user_lon)
+            
+            return jsonify(combined_data)
+        except Exception as e:
+            logger.error(f"Error calculating combined times: {e}")
+            return jsonify({"error": str(e)}), 500
+    
+    # Demo page for travel time feature
+    @app.route('/demo', methods=['GET'])
+    def demo():
+        lang = request.args.get('lang', 'nl')
+        
+        try:
+            with get_db() as wait_time_data:
+                current_data = wait_time_data.get_current_waiting()
+                last_update = wait_time_data.get_last_update_time()
+                best_loket = min(current_data, key=lambda x: x[2]) if current_data else None
+                
+                # URLs for canonical and alternate language links
+                host = request.host_url.rstrip('/')
+                canonical_url = f"{host}{request.path}"
+                lang_urls = {
+                    'nl': f"{host}{request.path}?lang=nl",
+                    'en': f"{host}{request.path}?lang=en",
+                    'tr': f"{host}{request.path}?lang=tr",
+                    'ma': f"{host}{request.path}?lang=ma"
+                }
+                
+                # Get office locations for the map
+                from location_service import get_all_office_locations
+                office_locations = get_all_office_locations()
+                
+            return render_template('demo.html', 
+                                  loket_data=current_data, 
+                                  best_loket=best_loket,
+                                  last_update=last_update,
+                                  canonical_url=canonical_url,
+                                  lang=lang,
+                                  lang_urls=lang_urls,
+                                  translations=translations,
+                                  office_locations=office_locations)
+        except Exception as e:
+            logger.error(f"Demo page error: {e}")
+            return render_template('demo.html', 
+                                  loket_data=[], 
+                                  best_loket=None,
+                                  last_update=None,
+                                  error="Unable to fetch data",
+                                  canonical_url=request.url,
+                                  lang=lang,
+                                  translations=translations)
     
     return app
 

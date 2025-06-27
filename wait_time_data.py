@@ -167,7 +167,7 @@ class WaitTimeLib:
             """, (loket_id, name.strip()))
         self.db.commit()
 
-    def get_current_waiting(self):
+    def get_current_waiting(self, user_lat=None, user_lon=None):
         # PostgreSQL syntax for getting latest records
         self.cursor.execute("""
             WITH latest_times AS (
@@ -182,7 +182,27 @@ class WaitTimeLib:
                 AND wt.timestamp = lt.max_timestamp
             LEFT JOIN loket_names ln ON wt.stadsloket_id = ln.stadsloket_id
         """)
-        return [(sid, name or 'Unknown', waittime, waiting) for sid, name, waittime, waiting in self.cursor.fetchall()]
+        
+        results = [(sid, name or 'Unknown', waittime, waiting) for sid, name, waittime, waiting in self.cursor.fetchall()]
+        
+        # Add travel time if user location is provided
+        if user_lat and user_lon:
+            try:
+                from location_service import calculate_travel_times
+                travel_times = calculate_travel_times(user_lat, user_lon)
+                
+                # Add travel info to results
+                enhanced_results = []
+                for sid, name, waittime, waiting in results:
+                    travel_info = travel_times.get(sid, {}).get('travel', {})
+                    enhanced_results.append((sid, name, waittime, waiting, travel_info))
+                return enhanced_results
+            except Exception as e:
+                logger.error(f"Failed to get travel times: {e}")
+                # Return without travel times if there was an error
+                return results
+        
+        return results
 
     def get_hourly_averages(self, day_of_week=None):
         """Get average wait times in minutes by hour of day for each stadsloket
@@ -298,6 +318,38 @@ class WaitTimeLib:
             "latest_timestamp": latest_ts,
             "latest_timestamp_ams": latest_ts_ams
         }
+
+    def get_combined_wait_and_travel_time(self, user_lat, user_lon):
+        """
+        Calculate total time investment (wait time + travel time)
+        for each city office from the user's location.
+        
+        Returns a list of offices sorted by total time.
+        """
+        current_data = self.get_current_waiting(user_lat, user_lon)
+        
+        # Calculate combined times
+        results = []
+        for record in current_data:
+            if len(record) >= 5:  # Has travel data
+                sid, name, waittime, waiting, travel_info = record
+                travel_minutes = travel_info.get('duration_minutes', 0) or 0
+                wait_minutes = int(waittime) if waittime and str(waittime).isdigit() else 0
+                total_minutes = wait_minutes + travel_minutes
+                
+                results.append({
+                    'stadsloket_id': sid,
+                    'loket_name': name,
+                    'wait_time': wait_minutes,
+                    'travel_time': travel_minutes,
+                    'total_time': total_minutes,
+                    'people_waiting': waiting,
+                    'distance_km': travel_info.get('distance_km', 0)
+                })
+        
+        # Sort by total time (travel + wait)
+        results.sort(key=lambda x: x['total_time'])
+        return results
 
     def close(self):
         if hasattr(self, 'cursor') and self.cursor:

@@ -147,6 +147,14 @@
         }
         setupTCF();
         </script>
+
+        <!-- Leaflet map for travel time calculations -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
     </head>
 <body>
     <!-- Language switcher -->
@@ -202,160 +210,340 @@
         </div>
     </header>
     
-    <!-- Breadcrumb navigation -->
-    <div class="breadcrumb">
-        <div class="content-container">
-            <span>
-                <a href="{{ request.url_root }}">Home</a> »
-                <span>Wachttijden Stadsloketten Amsterdam</span>
-            </span>
+    <!-- Streamlined recommendation and wait times - NEW STRUCTURE -->
+    <div class="main-content">
+        <!-- Data update status - More subtle placement -->
+        <div class="data-status">
+            {% if last_update %}
+            <p><i class="fas fa-sync-alt"></i> {{ translations[lang]['data_updated'] }}: {{ last_update.strftime('%H:%M') }}</p>
+            {% endif %}
+        </div>
+        
+        <!-- Primary action for location -->
+        <div class="quick-action-bar">
+            <button id="share-location" class="location-btn">
+                <i class="fas fa-bicycle"></i> 
+                {{ translations[lang]['calculate_travel'] }}
+            </button>
+            <p id="location-status" class="location-status" style="display: none;"></p>
+            
+            <!-- Collapsible chart toggle -->
+            <button id="show-patterns" class="action-btn">
+                <i class="fas fa-chart-line"></i>
+                {{ translations[lang]['show_patterns'] }}
+            </button>
+        </div>
+        
+        <!-- Primary recommendation card - Clearly highlighted -->
+        <div class="recommendation-container">
+            {% if best_loket %}
+            <div class="best-loket-card">
+                <div class="recommendation-header">
+                    <h2><i class="fas fa-star"></i> {{ translations[lang]['card_recommended_location'] }}</h2>
+                    <span class="badge">{{ translations[lang]['shortest_wait'] }}</span>
+                </div>
+                <div class="recommendation-body">
+                    <h3>{{ best_loket[1] }}</h3>
+                    <div class="stats-container">
+                        <div class="stat-item primary">
+                            <i class="fas fa-clock"></i>
+                            <span class="value">{{ best_loket[2] }}</span>
+                            <span class="label">{{ translations[lang]['minutes'] }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-users"></i>
+                            <span class="value">{{ best_loket[3] }}</span>
+                            <span class="label">{{ translations[lang]['waiting'] }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Will be populated with combined recommendation when location is shared -->
+            <div id="combined-recommendation" style="display: none;"></div>
+        </div>
+        
+        <!-- Map container - Hidden until location shared -->
+        <div id="map-container" class="map-container" style="display: none;">
+            <div id="map" style="height: 300px; width: 100%; border-radius: 8px;"></div>
+        </div>
+        
+        <!-- Collapsible chart section - Initially hidden for simplicity -->
+        <div id="chart-section" class="chart-section" style="display: none;">
+            <h2>{{ translations[lang]['plot_title'] }}</h2>
+            
+            <div class="day-selector">
+                <button class="day-button" data-day="1">{{ translations[lang]['day_monday'] }}</button>
+                <button class="day-button" data-day="2">{{ translations[lang]['day_tuesday'] }}</button>
+                <button class="day-button" data-day="3">{{ translations[lang]['day_wednesday'] }}</button>
+                <button class="day-button" data-day="4">{{ translations[lang]['day_thursday'] }}</button>
+                <button class="day-button" data-day="5">{{ translations[lang]['day_friday'] }}</button>
+            </div>
+            
+            <div class="opening-hours-note" id="opening-hours-note"></div>
+            
+            <div class="chart-responsive-wrapper">
+                <canvas id="seasonalityChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- All locations grid - Simplified cards -->
+        <div class="locations-header">
+            <h2>{{ translations[lang]['all_locations'] }}</h2>
+            <div class="list-controls">
+                <button id="sort-by-wait" class="sort-btn active">
+                    <i class="fas fa-clock"></i> {{ translations[lang]['sort_by_wait'] }}
+                </button>
+                <button id="sort-by-total" class="sort-btn" style="display: none;">
+                    <i class="fas fa-hourglass-half"></i> {{ translations[lang]['sort_by_total'] }}
+                </button>
+            </div>
+        </div>
+        
+        <div class="location-grid" id="all-locations-container">
+            {% for loket in loket_data %}
+            <div class="location-card" data-id="{{ loket[0] }}" data-wait="{{ loket[2] }}">
+                <h3>{{ loket[1] }}</h3>
+                <div class="card-content">
+                    <div class="wait-info">
+                        <div class="wait-time">
+                            <span class="value">{{ loket[2] }}</span>
+                            <span class="unit">{{ translations[lang]['minutes'] }}</span>
+                        </div>
+                        <div class="people-waiting">
+                            <i class="fas fa-users"></i> {{ loket[3] }}
+                        </div>
+                    </div>
+                    
+                    <!-- Travel info (hidden until location shared) -->
+                    <div class="travel-info" style="display: none;">
+                        <div class="travel-time">
+                            <i class="fas fa-bicycle"></i> <span class="travel-time-value"></span>
+                        </div>
+                        <div class="distance">
+                            <i class="fas fa-road"></i> <span class="distance-value"></span>
+                        </div>
+                        <div class="total-time">
+                            <i class="fas fa-hourglass-half"></i> <span class="total-time-value"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Minimal, collapsible FAQ section -->
+        <div class="faq-toggle">
+            <button id="toggle-faq" class="toggle-btn">
+                <i class="fas fa-question-circle"></i> {{ translations[lang]['show_faq'] }}
+            </button>
+        </div>
+        
+        <div id="faq-section" class="faq-section" style="display: none;">
+            <h2>{{ translations[lang]['faq_title'] }}</h2>
+            
+            <div class="faq-accordion">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>{{ translations[lang]['faq_q1_title'] }}</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>{{ translations[lang]['faq_q1_text'] }}</p>
+                    </div>
+                </div>
+                
+                <!-- Repeat for other FAQ items -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3><i class="fas fa-map-marker-alt"></i> {{ translations[lang]['faq_q2_title'] }}</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>{{ translations[lang]['faq_q2_text'] }}</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3><i class="fas fa-clock"></i> {{ translations[lang]['faq_q3_title'] }}</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>{{ translations[lang]['faq_q3_text'] }}</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3><i class="fas fa-calendar-check"></i> {{ translations[lang]['faq_q4_title'] }}</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>{{ translations[lang]['faq_q4_text'] }}</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3><i class="fas fa-door-open"></i> {{ translations[lang]['faq_q5_title'] }}</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>{{ translations[lang]['faq_q5_text'] }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- Data status section -->
-    <div class="data-status">
-        {% if last_update %}
-        <p><i class="fas fa-sync-alt"></i> Data last updated: {{ last_update.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        {% else %}
-        <p><i class="fas fa-exclamation-triangle"></i> Update time information unavailable</p>
-        {% endif %}
-    </div>
-
-    <!-- Recommended location section -->
-    {% if best_loket %}
-    <div class="bento">
-        <div class="best-loket">
-            <h2><i class="fas fa-star"></i> {{ translations[lang]['card_recommended_location'] }}</h2>
-            <p><i class="fas fa-building"></i> {{ best_loket[1] }}</p>
-            <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ best_loket[2] }} minutes</p>
-            <p><i class="fas fa-users"></i> {{ translations[lang]['card_currently_waiting'] }}: {{ best_loket[3] }} people</p>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Advertisement section 1 -->
+    
+    <!-- Discreet ad placement -->
     <div class="ad-container">
         <div class="ad-label">{{ translations[lang]['advertisement'] }}</div>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4863672404977337" crossorigin="anonymous"></script>
+        <!-- Horizontal -->
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-4863672404977337"
              data-ad-slot="4370543747"
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
-    </div>
-
-    <!-- Location data grid -->
-    <div class="bento">
-        {% for loket in loket_data %}
-        <div>
-            <h3><i class="fas fa-building"></i> {{ loket[1] }}</h3>
-            <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ loket[2] }} minutes</p>
-            <p><i class="fas fa-users"></i> {{ translations[lang]['card_currently_waiting'] }}: {{ loket[3] }} people</p>
-        </div>
-        {% endfor %}
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </div>
     
-    <!-- Seasonality chart section -->
-    <div class="chart-container">
-        <h2>{{ translations[lang]['plot_title'] }}</h2>
-        <p>{{ translations[lang]['plot_subtitle'] }}</p>
-        
-        <div class="day-selector">
-            <button class="day-button" data-day="1">{{ translations[lang]['day_monday'] }}</button>
-            <button class="day-button" data-day="2">{{ translations[lang]['day_tuesday'] }}</button>
-            <button class="day-button" data-day="3">{{ translations[lang]['day_wednesday'] }}</button>
-            <button class="day-button" data-day="4">{{ translations[lang]['day_thursday'] }}</button>
-            <button class="day-button" data-day="5">{{ translations[lang]['day_friday'] }}</button>
-        </div>
-        
-        <div class="opening-hours-note" id="opening-hours-note"></div>
-        
-        <div class="chart-responsive-wrapper">
-            <canvas id="seasonalityChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Advertisement section 2 -->
-    <div class="ad-container">
-        <div class="ad-label">{{ translations[lang]['advertisement'] }}</div>
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-4863672404977337"
-             data-ad-slot="4370543747"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-    </div>
-    
-    <!-- FAQ section -->
-    <section class="faq-section">
-        <h2>{{ translations[lang]['faq_title'] }}</h2>
-        
-        <div class="faq-items">
-            <div class="faq-item">
-                <h3><i class="fas fa-question-circle"></i> {{ translations[lang]['faq_q1_title'] }}</h3>
-                <p>{{ translations[lang]['faq_q1_text'] }}</p>
-            </div>
-            
-            <div class="faq-item">
-                <h3><i class="fas fa-map-marker-alt"></i> {{ translations[lang]['faq_q2_title'] }}</h3>
-                <p>{{ translations[lang]['faq_q2_text'] }}</p>
-            </div>
-            
-            <div class="faq-item">
-                <h3><i class="fas fa-clock"></i> {{ translations[lang]['faq_q3_title'] }}</h3>
-                <p>{{ translations[lang]['faq_q3_text'] }}</p>
-            </div>
-            
-            <div class="faq-item">
-                <h3><i class="fas fa-calendar-check"></i> {{ translations[lang]['faq_q4_title'] }}</h3>
-                <p>{{ translations[lang]['faq_q4_text'] }}</p>
-            </div>
-            
-            <div class="faq-item">
-                <h3><i class="fas fa-door-open"></i> {{ translations[lang]['faq_q5_title'] }}</h3>
-                <p>{{ translations[lang]['faq_q5_text'] }}</p>
-            </div>
-        </div>
-    </section>
-    
-    <!-- App JavaScript -->
+    <!-- App JavaScript - Streamlined functionality -->
     <script>
-        // Chart instance variable
-        let waitTimeChart = null;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize core functionality
+            setupChartToggle();
+            setupFaqAccordion();
+            setupSorting();
+            initCharts();
+            initLocationSharing();
+            
+            // Run AdSense
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        });
         
-        // Current day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
-        const currentDate = new Date();
-        let currentDay = currentDate.getDay();
-        
-        // Default to Monday if it's a weekend
-        if (currentDay === 0 || currentDay === 6) {
-            currentDay = 1;
+        // Toggle chart visibility
+        function setupChartToggle() {
+            const showPatternsBtn = document.getElementById('show-patterns');
+            const chartSection = document.getElementById('chart-section');
+            
+            showPatternsBtn.addEventListener('click', function() {
+                if (chartSection.style.display === 'none') {
+                    chartSection.style.display = 'block';
+                    showPatternsBtn.innerHTML = `<i class="fas fa-chart-line"></i> {{ translations[lang]['hide_patterns'] }}`;
+                } else {
+                    chartSection.style.display = 'none';
+                    showPatternsBtn.innerHTML = `<i class="fas fa-chart-line"></i> {{ translations[lang]['show_patterns'] }}`;
+                }
+            });
         }
         
-        // Day names for display
-        const dayNames = [
-            "{{ translations[lang]['day_sunday'] }}",
-            "{{ translations[lang]['day_monday'] }}",
-            "{{ translations[lang]['day_tuesday'] }}",
-            "{{ translations[lang]['day_wednesday'] }}",
-            "{{ translations[lang]['day_thursday'] }}",
-            "{{ translations[lang]['day_friday'] }}",
-            "{{ translations[lang]['day_saturday'] }}"
-        ];
-        
-        /**
-         * Initialize day selector and load initial chart data
-         */
-        document.addEventListener('DOMContentLoaded', function() {
-            const dayButtons = document.querySelectorAll('.day-button');
+        // Setup FAQ accordion
+        function setupFaqAccordion() {
+            const toggleFaqBtn = document.getElementById('toggle-faq');
+            const faqSection = document.getElementById('faq-section');
             
-            // Set initial active button
+            toggleFaqBtn.addEventListener('click', function() {
+                if (faqSection.style.display === 'none') {
+                    faqSection.style.display = 'block';
+                    toggleFaqBtn.innerHTML = `<i class="fas fa-question-circle"></i> {{ translations[lang]['hide_faq'] }}`;
+                } else {
+                    faqSection.style.display = 'none';
+                    toggleFaqBtn.innerHTML = `<i class="fas fa-question-circle"></i> {{ translations[lang]['show_faq'] }}`;
+                }
+            });
+            
+            // FAQ item click handlers
+            document.querySelectorAll('.faq-question').forEach(item => {
+                item.addEventListener('click', event => {
+                    const answer = item.nextElementSibling;
+                    const icon = item.querySelector('i');
+                    
+                    if (answer.style.maxHeight) {
+                        answer.style.maxHeight = null;
+                        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                    } else {
+                        answer.style.maxHeight = answer.scrollHeight + "px";
+                        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+                    }
+                });
+            });
+        }
+        
+        // Setup sorting functionality
+        function setupSorting() {
+            const sortByWaitBtn = document.getElementById('sort-by-wait');
+            const sortByTotalBtn = document.getElementById('sort-by-total');
+            
+            sortByWaitBtn.addEventListener('click', function() {
+                sortLocations('wait');
+                sortByWaitBtn.classList.add('active');
+                sortByTotalBtn.classList.remove('active');
+            });
+            
+            sortByTotalBtn.addEventListener('click', function() {
+                sortLocations('total');
+                sortByTotalBtn.classList.add('active');
+                sortByWaitBtn.classList.remove('active');
+            });
+        }
+        
+        // Location sorting function
+        function sortLocations(sortBy) {
+            const container = document.getElementById('all-locations-container');
+            const cards = Array.from(container.children);
+            
+            if (sortBy === 'wait') {
+                cards.sort((a, b) => {
+                    return parseInt(a.dataset.wait) - parseInt(b.dataset.wait);
+                });
+            } else if (sortBy === 'total') {
+                cards.sort((a, b) => {
+                    const aTotal = parseInt(a.querySelector('.total-time-value')?.textContent || a.dataset.wait);
+                    const bTotal = parseInt(b.querySelector('.total-time-value')?.textContent || b.dataset.wait);
+                    return aTotal - bTotal;
+                });
+            }
+            
+            // Reappend in sorted order
+            cards.forEach(card => container.appendChild(card));
+        }
+        
+        // Charts initialization - Auto-select current day
+        function initCharts() {
+            // Current day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+            const currentDate = new Date();
+            let currentDay = currentDate.getDay();
+            
+            // Default to Monday if it's a weekend
+            if (currentDay === 0 || currentDay === 6) {
+                currentDay = 1;
+            }
+            
+            // Day names for display
+            const dayNames = [
+                "{{ translations[lang]['day_sunday'] }}",
+                "{{ translations[lang]['day_monday'] }}",
+                "{{ translations[lang]['day_tuesday'] }}",
+                "{{ translations[lang]['day_wednesday'] }}",
+                "{{ translations[lang]['day_thursday'] }}",
+                "{{ translations[lang]['day_friday'] }}",
+                "{{ translations[lang]['day_saturday'] }}"
+            ];
+            
+            // Auto-select current day
+            const dayButtons = document.querySelectorAll('.day-button');
             dayButtons.forEach(button => {
                 if (parseInt(button.dataset.day) === currentDay) {
                     button.classList.add('active');
                 }
                 
-                // Add click event handler
                 button.addEventListener('click', function() {
                     dayButtons.forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
@@ -363,30 +551,23 @@
                 });
             });
             
-            // Load initial chart data
+            // Pre-load data for current day
             loadChartData(currentDay);
-        });
+        }
         
-        /**
-         * Load chart data for a specific day
-         * @param {number} day - Day of week (0-6)
-         */
+        // Load chart data (simplified from original)
         function loadChartData(day) {
+            // Fetch chart data for selected day
             fetch(`/hourly_data?day=${day}`)
                 .then(response => response.json())
                 .then(data => {
                     updateOpeningHoursNote(data.opening_hours, day);
-                    applyOpeningHoursFilter(data);
                     createOrUpdateChart(data);
                 })
                 .catch(error => console.error('Error loading chart data:', error));
         }
         
-        /**
-         * Update opening hours message
-         * @param {Array} hours - Opening and closing hours
-         * @param {number} day - Day of week
-         */
+        // Chart creation and update functions
         function updateOpeningHoursNote(hours, day) {
             const openingHoursNote = document.getElementById('opening-hours-note');
             const [openHour, closeHour] = hours;
@@ -406,46 +587,6 @@
             }
         }
         
-        /**
-         * Apply zero values outside opening hours and truncate datasets
-         * @param {Object} data - Chart data object
-         * @return {Object} Modified data object
-         */
-        function applyOpeningHoursFilter(data) {
-            const [openHour, closeHour] = data.opening_hours;
-            
-            data.datasets.forEach(dataset => {
-                // Mark values outside opening hours as zero
-                for (let i = 0; i < dataset.data.length; i++) {
-                    const hour = i + 8; // Data starts at 8:00
-                    if (hour < openHour || hour >= closeHour) {
-                        dataset.data[i] = 0;
-                    }
-                }
-                
-                // Find and truncate after two consecutive zeros
-                let cutoffIndex = -1;
-                for (let i = 0; i < dataset.data.length - 1; i++) {
-                    if (dataset.data[i] === 0 && dataset.data[i + 1] === 0) {
-                        cutoffIndex = i;
-                        break;
-                    }
-                }
-                
-                // Truncate if needed
-                if (cutoffIndex !== -1) {
-                    dataset.data = dataset.data.slice(0, cutoffIndex + 1);
-                    dataset.cutoffIndex = cutoffIndex;
-                }
-            });
-            
-            return data;
-        }
-        
-        /**
-         * Create or update the wait time chart
-         * @param {Object} data - Chart data object
-         */
         function createOrUpdateChart(data) {
             const ctx = document.getElementById('seasonalityChart').getContext('2d');
             const [openHour, closeHour] = data.opening_hours;
@@ -549,10 +690,185 @@
                 }
             });
         }
-
-        /**
-         * Cookie consent management
-         */
+        
+        // Location sharing and travel time
+        function initLocationSharing() {
+            // Store user location
+            let userLocation = null;
+            let map = null;
+            
+            // DOM elements
+            const shareLocationBtn = document.getElementById('share-location');
+            const locationStatus = document.getElementById('location-status');
+            const mapContainer = document.getElementById('map-container');
+            const combinedRecommendation = document.getElementById('combined-recommendation');
+            const sortByTotalBtn = document.getElementById('sort-by-total');
+            
+            // Check if geolocation is supported
+            if (!navigator.geolocation) {
+                shareLocationBtn.disabled = true;
+                locationStatus.textContent = "{{ translations[lang]['location_error'] }}";
+                locationStatus.style.display = 'block';
+                return;
+            }
+            
+            // Handle location sharing button click
+            shareLocationBtn.addEventListener('click', () => {
+                shareLocationBtn.disabled = true;
+                shareLocationBtn.innerHTML = `<div class="loader"></div> {{ translations[lang]['calculating'] }}`;
+                
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lon: position.coords.longitude
+                        };
+                        
+                        // Update UI
+                        shareLocationBtn.innerHTML = `<i class="fas fa-check"></i> {{ translations[lang]['location_shared'] }}`;
+                        shareLocationBtn.disabled = false;
+                        
+                        // Show map and fetch travel times
+                        mapContainer.style.display = 'block';
+                        initMap(userLocation);
+                        fetchTravelTimes(userLocation);
+                        
+                        // Show sort by total button
+                        sortByTotalBtn.style.display = 'block';
+                    },
+                    error => {
+                        shareLocationBtn.innerHTML = `<i class="fas fa-bicycle"></i> {{ translations[lang]['calculate_travel'] }}`;
+                        shareLocationBtn.disabled = false;
+                        locationStatus.textContent = "{{ translations[lang]['location_error'] }}: " + error.message;
+                        locationStatus.style.display = 'block';
+                    }
+                );
+            });
+            
+            // Initialize map
+            function initMap(location) {
+                if (map) {
+                    map.remove();
+                }
+                
+                // Create map centered on user location
+                map = L.map('map').setView([location.lat, location.lon], 11);
+                
+                // Add OpenStreetMap tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+                
+                // Add user marker
+                userMarker = L.marker([location.lat, location.lon], {
+                    title: 'Your Location',
+                    icon: L.divIcon({
+                        className: 'user-marker',
+                        html: '<i class="fas fa-map-marker-alt" style="color: #3498db; font-size: 24px;"></i>',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 24]
+                    })
+                }).addTo(map);
+                
+                // Add office markers - we'll fetch these from the API
+                fetch('/api/offices')
+                    .then(response => response.json())
+                    .then(offices => {
+                        for (const [id, office] of Object.entries(offices)) {
+                            const marker = L.marker([office.lat, office.lon], {
+                                title: document.querySelector(`.location-card[data-id="${id}"] h3`)?.textContent || `Office ${id}`,
+                                icon: L.divIcon({
+                                    className: 'office-marker',
+                                    html: '<i class="fas fa-building" style="color: #E32E35; font-size: 20px;"></i>',
+                                    iconSize: [20, 20],
+                                    iconAnchor: [10, 20]
+                                })
+                            }).addTo(map);
+                            
+                            marker.bindPopup(`<b>${office.address}</b>`);
+                            officeMarkers.push(marker);
+                        }
+                        
+                        // Fit bounds to include all markers
+                        const bounds = L.featureGroup([userMarker, ...officeMarkers]).getBounds();
+                        map.fitBounds(bounds, { padding: [50, 50] });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching office locations:', error);
+                    });
+            }
+            
+            // Fetch travel times
+            function fetchTravelTimes(location) {
+                fetch(`/api/combined-times?lat=${location.lat}&lon=${location.lon}`)
+                    .then(response => response.json())
+                    .then(data => updateUIWithTravelTimes(data))
+                    .catch(error => {
+                        console.error('Error fetching travel times:', error);
+                        locationStatus.textContent = 'Error fetching travel times. Please try again.';
+                        locationStatus.style.display = 'block';
+                    });
+            }
+            
+            // Update UI with travel times
+            function updateUIWithTravelTimes(combinedData) {
+                // Show best combined recommendation
+                if (combinedData.length > 0) {
+                    const bestCombined = combinedData[0];
+                    
+                    // Create and display recommendation card with total time
+                    const recommendationCard = document.createElement('div');
+                    recommendationCard.className = 'bento';
+                    recommendationCard.innerHTML = `
+                        <div class="best-combined">
+                            <h2><i class="fas fa-star"></i> {{ translations[lang]['best_combined'] }}</h2>
+                            <p><i class="fas fa-building"></i> ${bestCombined.loket_name}</p>
+                            <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: ${bestCombined.wait_time} {{ translations[lang]['minutes'] }}</p>
+                            <p><i class="fas fa-bicycle"></i> {{ translations[lang]['travel_time'] }}: ${bestCombined.travel_time} {{ translations[lang]['minutes'] }}</p>
+                            <p><i class="fas fa-road"></i> {{ translations[lang]['distance'] }}: ${bestCombined.distance_km} {{ translations[lang]['km'] }}</p>
+                            <p><i class="fas fa-hourglass-half"></i> {{ translations[lang]['total_time'] }}: ${bestCombined.total_time} {{ translations[lang]['minutes'] }}</p>
+                        </div>
+                    `;
+                    
+                    combinedRecommendation.appendChild(recommendationCard);
+                }
+                
+                // Update all location cards with travel times
+                const locationCards = document.querySelectorAll('.location-card');
+                
+                combinedData.forEach(data => {
+                    locationCards.forEach(card => {
+                        if (card.dataset.id == data.stadsloket_id) {
+                            // Add travel time info
+                            const travelInfo = card.querySelector('.travel-info');
+                            const travelTimeValue = card.querySelector('.travel-time-value');
+                            const distanceValue = card.querySelector('.distance-value');
+                            
+                            travelTimeValue.textContent = `{{ translations[lang]['travel_time'] }}: ${data.travel_time} {{ translations[lang]['minutes'] }}`;
+                            distanceValue.textContent = `{{ translations[lang]['distance'] }}: ${data.distance_km} {{ translations[lang]['km'] }}`;
+                            travelInfo.style.display = 'block';
+                            
+                            // Add total time
+                            const combinedTime = card.querySelector('.total-time');
+                            const totalTimeValue = card.querySelector('.total-time-value');
+                            
+                            totalTimeValue.textContent = `{{ translations[lang]['total_time'] }}: ${data.total_time} {{ translations[lang]['minutes'] }}`;
+                            combinedTime.style.display = 'block';
+                            
+                            // Highlight the best combined card
+                            if (combinedData[0] && data.stadsloket_id === combinedData[0].stadsloket_id) {
+                                card.classList.add('best-combined');
+                            }
+                        }
+                    });
+                });
+                
+                // Sort by wait time first to maintain consistency
+                sortLocations('wait');
+            }
+        }
+        
+        // Cookie consent management
         document.addEventListener('DOMContentLoaded', function() {
             const cookieBanner = document.getElementById('cookie-consent');
             const acceptAllBtn = document.getElementById('cookie-accept-all');
@@ -633,11 +949,9 @@
         });
     </script>
 
-    <!-- Footer -->
+    <!-- Footer - simplified -->
     <footer class="footer">
-        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time wachttijden stadsloketten Amsterdam</p>
-        <p style="color: #999;">Deze website is een onafhankelijk initiatief en heeft geen officiële relatie met de gemeente Amsterdam.</p>
-        <p><a href="https://www.amsterdam.nl/contact/" target="_blank">Officiële website van de gemeente Amsterdam</a></p>
+        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a></p>
         <nav class="footer-nav">
             <a href="{{ url_for('index') }}">{{ translations[lang]['nav_home'] }}</a>
             <a href="{{ url_for('privacy') }}">{{ translations[lang]['nav_privacy'] }}</a>
