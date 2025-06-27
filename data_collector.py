@@ -146,17 +146,13 @@ def main():
 
     # Schedule tasks
     schedule.every(15).minutes.do(collect_data)
-    schedule.every(8).minutes.do(keep_server_awake)
     
     # Initial run - only if collection is allowed
     if is_collection_allowed():
         collect_data()
     else:
         logger.info(f"Initial data collection skipped - outside collection hours ({COLLECT_START}:00-{COLLECT_END}:00)")
-        
-    if is_active_hours():
-        keep_server_awake()
-    
+
     # Main loop
     while True:
         try:
