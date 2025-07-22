@@ -34,21 +34,9 @@
         
         <!-- Primary Meta Tags -->
         <meta charset="UTF-8">
-        {% if lang == 'nl' %}
-        <title>WachtWijzer Stadsloketten Amsterdam | Live Actuele Wachttijden</title>
-        <meta name="description" content="Bekijk direct de actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en bespaar tijd.">
-        {% elif lang == 'en' %}
-        <title>Amsterdam City Offices Wait Times | Live Updates</title>
-        <meta name="description" content="Check real-time wait times at Amsterdam City Offices. Find the shortest queue instantly.">
-        {% elif lang == 'tr' %}
-        <title>Amsterdam Şehir Ofisleri Bekleme Süreleri | Canlı Güncellemeler</title>
-        <meta name="description" content="Amsterdam Şehir Ofislerindeki bekleme sürelerini kontrol edin. En kısa kuyruğu hemen bulun.">
-        {% elif lang == 'ma' %}
-        <title>أوقات الانتظار في مكاتب مدينة أمستردام | معلومات مباشرة</title>
-        <meta name="description" content="تحقق من أوقات الانتظار في مكاتب مدينة أمستردام. اعثر على أقصر طابور على الفور.">
-        {% endif %}
-        
-        <meta name="keywords" content="wachttijden stadsloketten Amsterdam, Amsterdam stadsloket wachtrij, gemeente Amsterdam wachttijd, actuele wachtrijen stadsloketten, wachttijden gemeente Amsterdam">
+        <title>{{ translations[lang]['site_title'] }}</title>
+        <meta name="description" content="{{ translations[lang]['site_description'] }}">
+        <meta name="keywords" content="{{ translations[lang]['site_keywords'] }}">
         <meta name="author" content="Twan Kerkhof">
         
         <!-- Canonical URL and Language alternates -->
@@ -72,15 +60,15 @@
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
         <meta property="og:url" content="{{ request.url }}">
-        <meta property="og:title" content="Wachttijden Stadsloketten Amsterdam | Actuele Informatie">
-        <meta property="og:description" content="Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en plan uw bezoek efficiënt.">
+        <meta property="og:title" content="{{ translations[lang]['og_title'] }}">
+        <meta property="og:description" content="{{ translations[lang]['og_description'] }}">
         <meta property="og:image" content="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png', _external=True) }}">
         
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
         <meta property="twitter:url" content="{{ request.url }}">
-        <meta property="twitter:title" content="Wachttijden Stadsloketten Amsterdam | Actuele Informatie">
-        <meta property="twitter:description" content="Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam. Vind het loket met de kortste wachttijd en plan uw bezoek efficiënt.">
+        <meta property="twitter:title" content="{{ translations[lang]['og_title'] }}">
+        <meta property="twitter:description" content="{{ translations[lang]['og_description'] }}">
         <meta property="twitter:image" content="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png', _external=True) }}">
         
         <!-- Structured Data -->
@@ -88,12 +76,12 @@
         {
           "@context": "https://schema.org",
           "@type": "WebApplication",
-          "name": "Wachttijden Stadsloketten Amsterdam",
-          "description": "Bekijk actuele wachttijden bij alle stadsloketten in Amsterdam",
+          "name": "{{ translations[lang]['app_name'] }}",
+          "description": "{{ translations[lang]['app_description'] }}",
           "url": "{{ request.url_root }}",
           "applicationCategory": "UtilityApplication",
           "operatingSystem": "All",
-          "keywords": "wachttijden, stadsloketten, Amsterdam, wachtrij, gemeente",
+          "keywords": "{{ translations[lang]['app_keywords'] }}",
           "offers": {
             "@type": "Offer",
             "price": "0"
@@ -104,7 +92,7 @@
           },
           "audience": {
             "@type": "Audience",
-            "audienceType": "Inwoners Amsterdam"
+            "audienceType": "{{ translations[lang]['app_audience'] }}"
           }
         }
         </script>
@@ -124,6 +112,12 @@
         <meta http-equiv="Cache-Control" content="max-age=1800">
 
         <!-- No local TCF stub: Google CMP will define __tcfapi itself -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+              integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+              crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+              integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+              crossorigin=""></script>
     </head>
 <body>
     <!-- Language switcher -->
@@ -142,7 +136,7 @@
             <p>{{ translations[lang]['hero_subtitle'] }}</p>
         </div>
         <div class="hero-image">
-            <img src="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png') }}" alt="Amsterdam stadsloketten wachttijden">
+            <img src="{{ url_for('static', filename='images/hero_design_remove_bg_cropped.png') }}" alt="{{ translations[lang]['hero_image_alt'] }}">
         </div>
     </header>
     
@@ -151,10 +145,28 @@
         <div class="content-container">
             <span>
                 <a href="{{ request.url_root }}">Home</a> »
-                <span>Wachttijden Stadsloketten Amsterdam</span>
+                <span>{{ translations[lang]['breadcrumb_title'] }}</span>
             </span>
         </div>
     </div>
+    
+    <div style="text-align: center; margin: 20px 0;">
+        <input type="text" id="postcode-input" placeholder="{{ translations[lang]['postcode_placeholder'] }}" style="padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-right: 10px;">
+        <button id="calculate-travel-time" class="loket-button" style="background-color: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+            <i class="fas fa-bicycle"></i> 
+            {{ translations[lang]['calculate_travel_time'] }}
+        </button>
+        <button id="share-location" class="loket-button" style="background-color: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+            <i class="fas fa-map-marker-alt"></i> 
+            {{ translations[lang]['use_current_location'] }}
+        </button>
+        <p id="location-status" style="display: none; color: #e74c3c; margin-top: 10px;"></p>
+        <div id="combined-recommendation" style="display: none; margin-top: 20px;"></div>
+    </div>
+    <div id="map-container" style="margin: 20px auto; max-width: 1200px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); border-radius: 10px; overflow: hidden; display: none;">
+        <div id="map" style="height: 300px; width: 100%;"></div>
+    </div>
+
 
     <!-- Recommended location section -->
     {% if best_loket %}
@@ -162,8 +174,8 @@
         <div class="best-loket loket-card" data-loket="{{ best_loket[1] }}">
             <h2><i class="fas fa-star"></i> {{ translations[lang]['card_recommended_location'] }}</h2>
             <p><i class="fas fa-building"></i> {{ best_loket[1] }}</p>
-            <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ best_loket[2] }} minutes</p>
-            <p><i class="fas fa-users"></i> {{ translations[lang]['card_currently_waiting'] }}: {{ best_loket[3] }} people</p>
+            <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ best_loket[2] }} {{ translations[lang]['minutes'] }}</p>
+            <p><i class="fas fa-users"></i> {{ translations[lang]['card_currently_waiting'] }}: {{ best_loket[3] }} {{ translations[lang]['people'] }}</p>
         </div>
     </div>
     {% endif %}
@@ -187,10 +199,15 @@
     <!-- Location data grid -->
     <div class="bento">
         {% for loket in loket_data %}
-        <div class="loket-card" data-loket="{{ loket[1] }}">
+        <div class="loket-card" data-loket="{{ loket[1] }}" data-id="{{ loket[0] }}">
             <h3><i class="fas fa-building"></i> {{ loket[1] }}</h3>
-            <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ loket[2] }} minutes</p>
-            <p><i class="fas fa-users"></i> {{ translations[lang]['card_currently_waiting'] }}: {{ loket[3] }} people</p>
+            <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ loket[2] }} {{ translations[lang]['minutes'] }}</p>
+            <p><i class="fas fa-users"></i> {{ translations[lang]['card_currently_waiting'] }}: {{ loket[3] }} {{ translations[lang]['people'] }}</p>
+            <div class="travel-info" style="display: none; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                <p class="travel-time"><i class="fas fa-bicycle"></i> {{ translations[lang]['travel_time'] }}: <span class="travel-time-value"></span></p>
+                <p class="distance"><i class="fas fa-road"></i> {{ translations[lang]['distance'] }}: <span class="distance-value"></span></p>
+                <p class="total-time" style="font-weight: bold;"><i class="fas fa-hourglass-half"></i> {{ translations[lang]['total_time'] }}: <span class="total-time-value"></span></p>
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -366,6 +383,7 @@
             
             // Load initial chart data
             loadChartData(currentDay);
+            initLocationSharing();
         });
         
         /**
@@ -560,13 +578,261 @@
             // Re-apply the active filter whenever the chart is redrawn (e.g., changing day)
             setLoketFilter(activeLoketFilter);
         }
+
+        function initLocationSharing() {
+            const shareLocationBtn = document.getElementById('share-location');
+            const calculateTravelTimeBtn = document.getElementById('calculate-travel-time');
+            const postcodeInp = document.getElementById('postcode-input');
+            const locationStatus = document.getElementById('location-status');
+            const mapContainer = document.getElementById('map-container');
+            const combinedRecommendation = document.getElementById('combined-recommendation');
+            let map = null;
+            let userMarker = null;
+            let officeMarkersGroup = L.layerGroup();
+            let routeLine = null;
+
+            // Make the dynamically added "Best Choice" card clickable
+            combinedRecommendation.addEventListener('click', (event) => {
+                const card = event.target.closest('.loket-card');
+                if (card && card.dataset.loket) {
+                    setLoketFilter(card.dataset.loket, { scroll: true });
+                }
+            });
+
+            // Trigger calculation on Enter key press
+            postcodeInp.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent form submission
+                    calculateTravelTimeBtn.click();
+                }
+            });
+
+            // Auto-format postcode input as the user types
+            postcodeInp.addEventListener('input', () => {
+                // Clear any previous error states
+                locationStatus.style.display = 'none';
+                postcodeInp.style.borderColor = '#ddd';
+                
+                let value = postcodeInp.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (value.length > 4) {
+                    value = value.slice(0, 4) + ' ' + value.slice(4);
+                }
+                postcodeInp.value = value.slice(0, 7);
+            });
+
+            calculateTravelTimeBtn.addEventListener('click', () => {
+                const postcode = postcodeInp.value;
+                const postcodeRegex = /^[1-9][0-9]{3}\s?[A-Z]{2}$/i;
+
+                if (!postcode) {
+                    locationStatus.textContent = "{{ translations[lang]['enter_postcode'] }}";
+                    locationStatus.style.display = 'block';
+                    postcodeInp.style.borderColor = 'red';
+                    return;
+                }
+
+                if (!postcodeRegex.test(postcode)) {
+                    locationStatus.textContent = "{{ translations[lang]['invalid_postcode'] }}";
+                    locationStatus.style.display = 'block';
+                    postcodeInp.style.borderColor = 'red';
+                    return;
+                }
+                
+                fetchTravelTimes(null, postcode);
+            });
+
+            if (!navigator.geolocation) {
+                shareLocationBtn.disabled = true;
+                shareLocationBtn.title = "{{ translations[lang]['geolocation_unavailable'] }}";
+            }
+
+            shareLocationBtn.addEventListener('click', () => {
+                fetchTravelTimes({ useGeolocation: true }, null);
+            });
+
+            function initMap(location) {
+                if (!map) {
+                    // First time setup: create map and add office markers
+                    map = L.map('map').setView([location.lat, location.lon], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+
+                    officeMarkersGroup.addTo(map);
+
+                    // Fetch and add office markers only once
+                    fetch('/api/offices')
+                        .then(response => response.json())
+                        .then(offices => {
+                            for (const [id, office] of Object.entries(offices)) {
+                                const officeName = document.querySelector(`.loket-card[data-id="${id}"] h3`)?.textContent || `${translations[lang]['stadsloket_prefix']} ${id}`;
+                                const officeMarker = L.marker([office.lat, office.lon])
+                                    .bindPopup(officeName);
+                                officeMarkersGroup.addLayer(officeMarker);
+                            }
+                        });
+                }
+
+                // Update user marker on every call
+                if (userMarker) {
+                    userMarker.setLatLng([location.lat, location.lon]);
+                } else {
+                    userMarker = L.marker([location.lat, location.lon])
+                        .bindPopup('Jouw locatie')
+                        .addTo(map);
+                }
+                
+                // Center map on the new location and open the popup
+                map.setView([location.lat, location.lon], 13);
+                userMarker.openPopup();
+            }
+
+            function fetchTravelTimes(location, postcode) {
+                let url = '/api/combined-times?';
+                const buttonToUpdate = postcode ? calculateTravelTimeBtn : shareLocationBtn;
+                const originalButtonText = buttonToUpdate.innerHTML;
+
+                // Clear previous errors and reset styles
+                locationStatus.style.display = 'none';
+                postcodeInp.style.borderColor = '#ddd';
+                buttonToUpdate.disabled = true;
+                buttonToUpdate.innerHTML = `<span>{{ translations[lang]['calculating'] }}</span>`;
+
+                if (location && location.useGeolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            const userLocation = {
+                                lat: position.coords.latitude,
+                                lon: position.coords.longitude
+                            };
+                            url += `lat=${userLocation.lat}&lon=${userLocation.lon}`;
+                            
+                            mapContainer.style.display = 'block';
+                            initMap(userLocation);
+                            
+                            performFetch(url, buttonToUpdate, originalButtonText);
+                        },
+                        error => {
+                            locationStatus.textContent = "{{ translations[lang]['location_error'] }} " + error.message;
+                            locationStatus.style.display = 'block';
+                            buttonToUpdate.disabled = false;
+                            buttonToUpdate.innerHTML = originalButtonText;
+                        }
+                    );
+                } else if (postcode) {
+                    url += `postcode=${postcode}`;
+                    performFetch(url, buttonToUpdate, originalButtonText);
+                } else {
+                     buttonToUpdate.disabled = false;
+                     buttonToUpdate.innerHTML = originalButtonText;
+                    return;
+                }
+            }
+            
+            function performFetch(url, button, originalText) {
+                button.disabled = true;
+                button.innerHTML = `<span>{{ translations[lang]['calculating'] }}</span>`;
+
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw new Error(err.error || 'Server error'); });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        button.disabled = false;
+                        button.innerHTML = originalText;
+                        
+                        if (data.length === 0) {
+                            locationStatus.textContent = "{{ translations[lang]['travel_time_error'] }}";
+                            locationStatus.style.display = 'block';
+                        } else {
+                            const userLocation = data.user_location;
+                            const locations = data.locations;
+
+                            if (userLocation) {
+                                mapContainer.style.display = 'block';
+                                initMap(userLocation);
+                            }
+                            
+                            if (locations && locations.length === 0) {
+                                locationStatus.textContent = "{{ translations[lang]['travel_time_error'] }}";
+                                locationStatus.style.display = 'block';
+                            } else {
+                                updateUIWithTravelTimes(locations, userLocation);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching travel times:', error);
+                        button.disabled = false;
+                        button.innerHTML = originalText;
+                        locationStatus.textContent = error.message || "{{ translations[lang]['travel_time_error'] }}";
+                        locationStatus.style.display = 'block';
+                    });
+            }
+
+            function updateUIWithTravelTimes(combinedData, userLocation) {
+                const bestCombined = combinedData[0];
+                
+                if (bestCombined) {
+                    const combinedCard = `
+                        <div class="bento">
+                            <div class="best-loket loket-card" data-loket="${bestCombined.loket_name}" style="cursor: pointer;">
+                                <h2><i class="fas fa-star-half-alt"></i> {{ translations[lang]['best_choice'] }}</h2>
+                                <p><i class="fas fa-building"></i> ${bestCombined.loket_name}</p>
+                                <p><i class="fas fa-hourglass-half"></i> {{ translations[lang]['total_time'] }}: ${bestCombined.total_time} {{ translations[lang]['minutes'] }}</p>
+                                <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: ${bestCombined.wait_time} {{ translations[lang]['minutes'] }}</p>
+                                <p><i class="fas fa-bicycle"></i> {{ translations[lang]['travel_time'] }}: ${bestCombined.travel_time} {{ translations[lang]['minutes'] }}</p>
+                            </div>
+                        </div>`;
+                    combinedRecommendation.innerHTML = combinedCard;
+                    combinedRecommendation.style.display = 'block';
+                    
+                    // Draw route for the best option
+                    if (bestCombined.geometry && bestCombined.geometry.length > 0) {
+                        if (routeLine) {
+                            routeLine.remove();
+                        }
+                        routeLine = L.polyline(bestCombined.geometry, {color: 'blue'}).addTo(map);
+                        
+                        // Fit map to route bounds
+                        map.fitBounds(routeLine.getBounds());
+                    } else if(userLocation) {
+                        // If no route, just show the user and the loket
+                        const officeLocation = officeMarkersGroup.getLayers().find(marker => 
+                            marker.getPopup().getContent().includes(bestCombined.loket_name)
+                        )?.getLatLng();
+
+                        if (officeLocation) {
+                           map.fitBounds([
+                                [userLocation.lat, userLocation.lon],
+                                [officeLocation.lat, officeLocation.lng]
+                           ]);
+                        }
+                    }
+                }
+
+                combinedData.forEach(item => {
+                    const card = document.querySelector(`.loket-card[data-id="${item.stadsloket_id}"]`);
+                    if (card) {
+                        const travelInfoDiv = card.querySelector('.travel-info');
+                        card.querySelector('.travel-time-value').textContent = `${item.travel_time} {{ translations[lang]['minutes'] }}`;
+                        card.querySelector('.distance-value').textContent = `${item.distance_km} km`;
+                        card.querySelector('.total-time-value').textContent = `${item.total_time} {{ translations[lang]['minutes'] }}`;
+                        travelInfoDiv.style.display = 'block';
+                    }
+                });
+            }
+        }
     </script>
 
     <!-- Footer -->
     <footer class="footer">
-        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time wachttijden stadsloketten Amsterdam</p>
-        <p style="color: #999;">Deze website is een onafhankelijk initiatief en heeft geen officiële relatie met de gemeente Amsterdam.</p>
-        <p><a href="https://www.amsterdam.nl/contact/" target="_blank">Officiële website van de gemeente Amsterdam</a></p>
+        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | {{ translations[lang]['footer_text'] }}</p>
+        <p style="color: #999;">{{ translations[lang]['footer_disclaimer'] }}</p>
+        <p><a href="https://www.amsterdam.nl/contact/" target="_blank">{{ translations[lang]['footer_official_link'] }}</a></p>
         <nav class="footer-nav">
             <a href="{{ url_for('index') }}">{{ translations[lang]['nav_home'] }}</a>
             <a href="{{ url_for('privacy') }}">{{ translations[lang]['nav_privacy'] }}</a>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="{{ lang|default('nl') }}">
 <head>
     <!-- Google Tag (gtag.js) & default consent settings -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XECBEDSBR"></script>
@@ -37,11 +37,11 @@
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "Privacybeleid",
-      "description": "Ons privacybeleid beschrijft hoe wij omgaan met uw gegevens bij het gebruik van de Amsterdam Stadsloket Wachttijden service.",
+      "name": "{{ translations[lang]['privacy_title'] }}",
+      "description": "{{ translations[lang]['privacy_description_schema'] }}",
       "isPartOf": {
         "@type": "WebSite",
-        "name": "Amsterdam Stadsloket Wachttijden",
+        "name": "{{ translations[lang]['app_name'] }}",
         "url": "{{ request.url_root }}"
       }
     }
@@ -66,15 +66,14 @@
     </div>
     <header class="hero">
         <div class="hero-content">
-            <h1>Privacybeleid</h1>
-            <p>Amsterdam Stadsloket Wachttijden</p>
+            <h1>{{ translations[lang]['privacy_title'] }}</h1>
+            <p>{{ translations[lang]['privacy_page_title'] }}</p>
         </div>
     </header>
 
-    <div class="content-container">
+    <div class="bento">
         <article class="privacy-policy">
-            <h2>Privacybeleid</h2>
-            <p class="last-updated">Laatst bijgewerkt: 1 oktober 2023</p>
+            <p>{{ translations[lang]['privacy_welcome'] }}</p>
             
             <section>
                 <h3>1. Inleiding</h3>
@@ -139,7 +138,7 @@
     </div>
 
     <footer class="footer">
-        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time waiting information stadsloketten Amsterdam</p>
+        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | {{ translations[lang]['footer_text'] }}</p>
         <nav class="footer-nav">
             <a href="{{ url_for('index') }}">{{ translations[lang]['nav_home'] }}</a>
             <a href="{{ url_for('privacy') }}">{{ translations[lang]['nav_privacy'] }}</a>

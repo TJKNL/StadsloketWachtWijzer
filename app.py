@@ -6,6 +6,7 @@ import logging
 from contextlib import contextmanager
 import time
 from translations import translations
+from location_service import get_all_office_locations, calculate_travel_times, get_coords_from_postcode
 
 # Load environment variables
 load_dotenv()
@@ -114,6 +115,80 @@ def create_app():
         return render_template('privacy.html',
                                translations=translations,
                                lang=lang)
+    
+    @app.route('/api/offices', methods=['GET'])
+    def get_offices():
+        try:
+            offices = get_all_office_locations()
+            return jsonify(offices)
+        except Exception as e:
+            logger.error(f"Error in get_offices route: {e}")
+            return jsonify({"error": "Unable to fetch office locations"}), 500
+
+    @app.route('/api/combined-times', methods=['GET'])
+    def get_combined_times():
+        user_lat = request.args.get('lat')
+        user_lon = request.args.get('lon')
+        postcode = request.args.get('postcode')
+
+        if not (user_lat and user_lon) and not postcode:
+            return jsonify({"error": "Latitude and longitude, or a postcode are required"}), 400
+
+        try:
+            if postcode:
+                coords = get_coords_from_postcode(postcode)
+                if not coords:
+                    return jsonify({"error": "Invalid postcode or could not geocode"}), 400
+                user_lat = coords['lat']
+                user_lon = coords['lon']
+            else:
+                user_lat = float(user_lat)
+                user_lon = float(user_lon)
+        except ValueError:
+            return jsonify({"error": "Invalid latitude or longitude"}), 400
+
+        try:
+            with get_db() as wait_time_data:
+                current_data = wait_time_data.get_current_waiting()
+                travel_times = calculate_travel_times(user_lat, user_lon)
+                
+                combined_data = []
+                for loket_data in current_data:
+                    loket_id, loket_name, wait_time_str, people_waiting_str = loket_data
+                    
+                    if loket_id in travel_times:
+                        travel_info = travel_times[loket_id]['travel']
+                        travel_duration = travel_info.get('duration_minutes')
+
+                        if travel_duration is not None:
+                            try:
+                                wait_time = int(wait_time_str)
+                                people_waiting = int(people_waiting_str)
+                                total_time = wait_time + travel_duration
+                                
+                                combined_data.append({
+                                    'stadsloket_id': loket_id,
+                                    'loket_name': loket_name,
+                                    'wait_time': wait_time,
+                                    'people_waiting': people_waiting,
+                                    'travel_time': travel_duration,
+                                    'distance_km': travel_info['distance_km'],
+                                    'total_time': total_time,
+                                    'geometry': travel_info.get('geometry', [])
+                                })
+                            except (ValueError, TypeError):
+                                logger.warning(f"Could not parse data for loket_id {loket_id}: wait_time='{wait_time_str}', people_waiting='{people_waiting_str}'")
+                
+                # Sort by total time
+                combined_data.sort(key=lambda x: x['total_time'])
+                
+            return jsonify({
+                'user_location': {'lat': user_lat, 'lon': user_lon},
+                'locations': combined_data
+            })
+        except Exception as e:
+            logger.error(f"Error in get_combined_times route: {e}")
+            return jsonify({"error": "Unable to fetch combined times"}), 500
     
     # Routes
     @app.route('/', methods=['GET'])

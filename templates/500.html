@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="{{ lang|default('nl') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Server Fout | Stadsloket Wachttijden</title>
+    <title>{{ translations[lang]['error_500_title'] }} | {{ translations[lang]['error_page_title_suffix'] }}</title>
     <meta name="robots" content="noindex, follow">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -27,23 +27,35 @@
     </style>
 </head>
 <body>
+    <div class="language-switcher">
+        {% for code, label, flag in supported_languages %}
+            <a href="?lang={{ code }}">
+                {{ flag }}
+            </a>
+        {% endfor %}
+    </div>
+    
     <header class="hero">
         <div class="hero-content">
-            <h1>Server Fout</h1>
-            <p>Er is iets misgegaan</p>
+            <h1>{{ translations[lang]['error_500_title'] }}</h1>
+            <p>{{ translations[lang]['error_500_subtitle'] }}</p>
         </div>
     </header>
 
     <div class="bento">
         <div>
-            <h2><i class="fas fa-exclamation-circle"></i> 500 Fout</h2>
-            <p>Er is een probleem opgetreden bij het verwerken van uw verzoek.</p>
-            <p>Probeer het later nog eens of ga terug naar <a href="{{ url_for('index') }}">de homepage</a>.</p>
+            <h2><i class="fas fa-exclamation-circle"></i> {{ translations[lang]['error_500_heading'] }}</h2>
+            <p>{{ translations[lang]['error_500_text'] }}</p>
+            <p>{{ translations[lang]['error_500_link'] }}</p>
         </div>
     </div>
 
     <footer class="footer">
-        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | Real-time waiting information stadsloketten Amsterdam</p>
+        <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | {{ translations[lang]['footer_text'] }}</p>
+        <nav class="footer-nav">
+            <a href="{{ url_for('index') }}">{{ translations[lang]['nav_home'] }}</a>
+            <a href="{{ url_for('privacy') }}">{{ translations[lang]['nav_privacy'] }}</a>
+        </nav>
     </footer>
 </body>
 </html>
