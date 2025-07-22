@@ -184,11 +184,12 @@
             {{ translations[lang]['use_current_location'] }}
         </button>
         <p id="location-status" style="display: none; color: #e74c3c; margin-top: 10px;"></p>
-        <div id="combined-recommendation" style="display: none; margin-top: 20px;"></div>
     </div>
     <div id="map-container" style="margin: 20px auto; max-width: 1200px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); border-radius: 10px; overflow: hidden; display: none;">
         <div id="map" style="height: 300px; width: 100%;"></div>
     </div>
+    <!-- Moved below map so the recommendation appears under the map -->
+    <div id="combined-recommendation" style="display: none; margin: 20px auto; text-align: center;"></div>
 
 
     <!-- Recommended location section -->
@@ -711,6 +712,12 @@
             }
 
             function fetchTravelTimes(location, postcode) {
+                // Smoothly scroll so the postcode & location controls are near the top of the viewport
+                const controlsContainer = postcodeInp.parentElement;
+                if (controlsContainer) {
+                    const yOffset = controlsContainer.getBoundingClientRect().top + window.pageYOffset - 20; // 20px padding
+                    window.scrollTo({ top: yOffset, behavior: 'smooth' });
+                }
                 let url = '/api/combined-times?';
                 const buttonToUpdate = postcode ? calculateTravelTimeBtn : shareLocationBtn;
                 const originalButtonText = buttonToUpdate.innerHTML;
@@ -800,6 +807,14 @@
                 const bestCombined = combinedData[0];
                 
                 if (bestCombined) {
+                    // Remove any previously rendered recommended card (server-side) to prevent duplicate cards
+                    document.querySelectorAll('.best-loket.loket-card').forEach(card => {
+                        if (!combinedRecommendation.contains(card)) {
+                            const parentBento = card.closest('.bento');
+                            (parentBento || card).remove();
+                        }
+                    });
+
                     const combinedCard = `
                         <div class="bento">
                             <div class="best-loket loket-card" data-loket="${bestCombined.loket_name}" style="cursor: pointer;">
