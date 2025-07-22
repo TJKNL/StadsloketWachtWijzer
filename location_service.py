@@ -5,6 +5,8 @@ import os
 from dotenv import load_dotenv
 import time
 import json
+import re
+import polyline
 
 # Load environment variables
 load_dotenv()
@@ -19,22 +21,64 @@ ORS_BASE_URL = "https://api.openrouteservice.org/v2/directions/cycling-regular"
 # Amsterdam city office locations (id: [lat, lon, address])
 AMSTERDAM_OFFICES = {
     # Centrum
-    1: [52.3702, 4.9021, "Amstel 1, 1011 PN Amsterdam"],
-    # Noord
-    2: [52.3912, 4.9340, "Buikslotermeerplein 2000, 1025 XL Amsterdam"],
-    # Zuidoost
-    3: [52.3172, 4.9533, "Anton de Komplein 150, 1102 CW Amsterdam"],
-    # Oost
-    4: [52.3659, 4.9419, "Oranje-Vrijstaatplein 2, 1093 NG Amsterdam"],
-    # West (Jan van Galenstraat)
-    5: [52.3722, 4.8650, "Jan van Galenstraat, 1056 AA Amsterdam"],
+    5: [52.3679375, 4.8969876, "Amstel 1, 1011 PN Amsterdam"],
     # Nieuw-West
-    6: [52.3581, 4.8038, "Osdorpplein 1000, 1068 TG Amsterdam"],
+    6: [52.3578312, 4.7999629, "Osdorpplein 1000, 1068 TG Amsterdam"],
+    # Noord
+    7: [52.4008393, 4.9279192, "Buikslotermeerplein 2000, 1025 XL Amsterdam"],
+    # Oost
+    8: [52.356708, 4.9284181, "Oranje-Vrijstaatplein 2, 1093 NG Amsterdam"],
+    # West
+    9: [52.3713686, 4.8349433, "Jan van Galenstraat 323, 1056 AA Amsterdam"],
     # Zuid
-    7: [52.3475, 4.8732, "President Kennedylaan 923, 1079 MZ Amsterdam"],
-    # Weesp
-    8: [52.3074, 5.0432, "Nieuwstraat 70a, 1381 BD Weesp"]
+    10: [52.3404624, 4.8913578, "President Kennedylaan 923, 1079 MZ Amsterdam"],
+    # Zuidoost
+    11: [52.3162788, 4.9538333, "Anton de Komplein 150, 1102 CW Amsterdam"],
 }
+
+@lru_cache(maxsize=128)
+def get_coords_from_postcode(postcode):
+    """
+    Geocode a Dutch postcode to latitude and longitude using Nominatim API.
+    Includes smart text processing for different formats.
+    """
+    # Normalize postcode: remove spaces and convert to uppercase
+    processed_postcode = re.sub(r'\s+', '', postcode).upper()
+    
+    # Basic validation for Dutch postcode format (e.g., 1234AB)
+    if not re.match(r'^[1-9][0-9]{3}[A-Z]{2}$', processed_postcode):
+        logger.error(f"Invalid postcode format: {postcode}")
+        return None
+
+    # Use Nominatim for geocoding
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {
+        'postalcode': processed_postcode,
+        'country': 'NL',
+        'format': 'json',
+        'limit': 1
+    }
+    
+    headers = {
+        'User-Agent': 'StadsloketWachtWijzer/1.0'
+    }
+    
+    try:
+        response = requests.get(url, params=params, headers=headers, timeout=5)
+        response.raise_for_status()  # Raise an exception for bad status codes
+        data = response.json()
+        
+        if data:
+            lat = float(data[0]['lat'])
+            lon = float(data[0]['lon'])
+            return {'lat': lat, 'lon': lon}
+        else:
+            logger.warning(f"Could not geocode postcode: {postcode}")
+            return None
+            
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error geocoding postcode {postcode}: {e}")
+        return None
 
 @lru_cache(maxsize=32)
 def get_cycling_time(from_lat, from_lon, to_lat, to_lon, valid_for=300):
@@ -94,7 +138,8 @@ def get_cycling_time(from_lat, from_lon, to_lat, to_lon, valid_for=300):
         
         body = {
             'coordinates': [[from_lon, from_lat], [to_lon, to_lat]],
-            'instructions': False
+            'instructions': False,
+            'geometry': True
         }
         
         response = requests.post(
@@ -106,14 +151,21 @@ def get_cycling_time(from_lat, from_lon, to_lat, to_lon, valid_for=300):
         
         if response.status_code == 200:
             data = response.json()
+            
             # Extract duration and distance from response
             route = data['routes'][0]
             duration_seconds = route['summary']['duration']
             distance_meters = route['summary']['distance']
+
+            # Decode the geometry from the encoded polyline string
+            geometry = []
+            if 'geometry' in route:
+                geometry = polyline.decode(route['geometry'])
             
             return {
                 'duration_minutes': round(duration_seconds / 60),
-                'distance_km': round(distance_meters / 1000, 1)
+                'distance_km': round(distance_meters / 1000, 1),
+                'geometry': geometry
             }
         else:
             logger.error(f"API error: {response.status_code} - {response.text}")
