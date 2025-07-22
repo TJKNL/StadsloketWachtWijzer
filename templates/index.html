@@ -23,6 +23,12 @@
         
         <!-- Google AdSense -->
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4863672404977337" crossorigin="anonymous"></script>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({
+                google_ad_client: "ca-pub-4863672404977337",
+                enable_page_level_ads: true
+            });
+        </script>
 
         <!-- AdSense initialization -->
         <script>
@@ -156,39 +162,6 @@
                 {{ flag }}
             </a>
         {% endfor %}
-    </div>
-
-    <!-- Cookie consent banner -->
-    <div id="cookie-consent" class="cookie-bento">
-        <h3><i class="fas fa-cookie-bite"></i> {{ translations[lang]['cookie_banner_title'] }}</h3>
-        <p>{{ translations[lang]['cookie_banner_text'] }}</p>
-        
-        <div id="consent-initial-buttons" class="cookie-buttons">
-            <button id="cookie-accept-all" class="cookie-btn accept">{{ translations[lang]['cookie_accept_button'] }}</button>
-            <button id="show-more-options" class="cookie-btn options">{{ translations[lang]['cookie_more_options'] }}</button>
-        </div>
-        
-        <div id="consent-advanced" class="consent-advanced" style="display: none;">
-            <div class="consent-choices">
-                <div class="consent-option">
-                    <input type="checkbox" id="consent-analytics" name="consent-analytics" checked>
-                    <label for="consent-analytics">{{ translations[lang]['cookie_analytics_option'] }}</label>
-                    <div class="option-description">{{ translations[lang]['cookie_analytics_description'] }}</div>
-                </div>
-                <div class="consent-option">
-                    <input type="checkbox" id="consent-ads" name="consent-ads" checked>
-                    <label for="consent-ads">{{ translations[lang]['cookie_ads_option'] }}</label>
-                    <div class="option-description">{{ translations[lang]['cookie_ads_description'] }}</div>
-                </div>
-            </div>
-            
-            <div class="cookie-buttons">
-                <button id="cookie-customize" class="cookie-btn customize">{{ translations[lang]['cookie_save_choices'] }}</button>
-                <button id="cookie-reject-all" class="cookie-btn decline">{{ translations[lang]['cookie_decline_all'] }}</button>
-            </div>
-        </div>
-        
-        <a href="{{ url_for('privacy') }}" class="cookie-policy-link">{{ translations[lang]['cookie_more_info'] }}</a>
     </div>
 
     <!-- Hero section -->
@@ -559,88 +532,6 @@
                 }
             });
         }
-
-        /**
-         * Cookie consent management
-         */
-        document.addEventListener('DOMContentLoaded', function() {
-            const cookieBanner = document.getElementById('cookie-consent');
-            const acceptAllBtn = document.getElementById('cookie-accept-all');
-            const showMoreOptionsBtn = document.getElementById('show-more-options');
-            const consentInitialButtons = document.getElementById('consent-initial-buttons');
-            const consentAdvanced = document.getElementById('consent-advanced');
-            const customizeBtn = document.getElementById('cookie-customize');
-            const rejectAllBtn = document.getElementById('cookie-reject-all');
-            const analyticsCheckbox = document.getElementById('consent-analytics');
-            const adsCheckbox = document.getElementById('consent-ads');
-            
-            // Show more options when clicking "More Options" button
-            showMoreOptionsBtn.addEventListener('click', function() {
-                consentInitialButtons.style.display = 'none';
-                consentAdvanced.style.display = 'block';
-            });
-            
-            // Check for existing consent
-            function checkConsent() {
-                const consentCookie = document.cookie.split(';').find(c => c.trim().startsWith('consent_settings='));
-                
-                if (consentCookie) {
-                    try {
-                        const consentSettings = JSON.parse(decodeURIComponent(consentCookie.split('=')[1]));
-                        cookieBanner.style.display = 'none';
-                        updateConsentState(consentSettings);
-                        return true;
-                    } catch (e) {
-                        console.error('Error parsing consent cookie:', e);
-                    }
-                }
-                return false;
-            }
-            
-            // Update Google Consent Mode based on user choices
-            function updateConsentState(settings) {
-                gtag('consent', 'update', {
-                    'analytics_storage': settings.analytics ? 'granted' : 'denied',
-                    'ad_storage': settings.ads ? 'granted' : 'denied',
-                });
-            }
-            
-            // Save consent choices
-            function saveConsent(settings) {
-                document.cookie = 'consent_settings=' + encodeURIComponent(JSON.stringify(settings)) + 
-                    '; max-age=' + (86400 * 365) + '; path=/; SameSite=Lax';
-                
-                updateConsentState(settings);
-                cookieBanner.style.display = 'none';
-            }
-            
-            // Check if consent was already given
-            if (!checkConsent()) {
-                cookieBanner.style.display = 'block';
-            }
-            
-            // Event handlers
-            acceptAllBtn.addEventListener('click', function() {
-                saveConsent({
-                    analytics: true,
-                    ads: true
-                });
-            });
-            
-            rejectAllBtn.addEventListener('click', function() {
-                saveConsent({
-                    analytics: false,
-                    ads: false
-                });
-            });
-            
-            customizeBtn.addEventListener('click', function() {
-                saveConsent({
-                    analytics: analyticsCheckbox.checked,
-                    ads: adsCheckbox.checked
-                });
-            });
-        });
     </script>
 
     <!-- Footer -->
