@@ -112,6 +112,25 @@
         <meta http-equiv="Cache-Control" content="max-age=1800">
 
         <!-- No local TCF stub: Google CMP will define __tcfapi itself -->
+        <style>
+    .intro-container {
+        text-align: center;
+        margin: 40px auto; /* Increased vertical margin for more space */
+        padding: 0 15px;
+        max-width: 90%; /* Responsive width for mobile */
+    }
+    .intro-container p {
+        font-size: 1.25rem; /* Larger, subtitle-like font size */
+        line-height: 1.7;
+        color: #555; /* Softer text color */
+        margin: 0;
+    }
+    @media (min-width: 768px) {
+        .intro-container {
+            max-width: 650px; /* Narrower width on desktop */
+        }
+    }
+</style>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
               integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
               crossorigin=""/>
@@ -148,6 +167,10 @@
                 <span>{{ translations[lang]['breadcrumb_title'] }}</span>
             </span>
         </div>
+    </div>
+
+    <div class="intro-container content-container">
+        <p>{{ translations[lang]['intro_text'] }}</p>
     </div>
     
     <div style="text-align: center; margin: 20px 0;">
