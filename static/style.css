@@ -147,27 +147,6 @@ body {
     margin-top: 4rem;
 }
 
-.data-status {
-    text-align: center;
-    margin: 0 auto;
-    padding: 8px;
-    max-width: 1200px;
-    color: #555;
-    font-size: 0.9rem;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.data-status p {
-    margin: 0;
-}
-
-.data-status i {
-    margin-right: 5px;
-    color: #4a6fa5;
-}
-
 /* New SEO-friendly styles */
 .breadcrumbs {
     padding: 0.5rem 2rem;
@@ -613,4 +592,35 @@ a:focus, button:focus {
         padding: 0.5rem;
         margin: 1rem auto;
     }
+}
+
+/* Loket selector styles */
+.loket-selector {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.loket-button {
+    padding: 0.5rem 1rem;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.loket-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.loket-button.active {
+    background-color: var(--amsterdam-red);
+    color: white;
+    border-color: var(--amsterdam-red);
 }

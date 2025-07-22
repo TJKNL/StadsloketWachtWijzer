@@ -123,7 +123,6 @@ def create_app():
         try:
             with get_db() as wait_time_data:
                 current_data = wait_time_data.get_current_waiting()
-                last_update = wait_time_data.get_last_update_time()
                 best_loket = min(current_data, key=lambda x: x[2]) if current_data else None
                 
                 # URLs for canonical and alternate language links
@@ -139,7 +138,6 @@ def create_app():
             return render_template('index.html', 
                                   loket_data=current_data, 
                                   best_loket=best_loket,
-                                  last_update=last_update,
                                   canonical_url=canonical_url,
                                   lang=lang,
                                   lang_urls=lang_urls,

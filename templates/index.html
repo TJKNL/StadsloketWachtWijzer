@@ -156,19 +156,10 @@
         </div>
     </div>
 
-    <!-- Data status section -->
-    <div class="data-status">
-        {% if last_update %}
-        <p><i class="fas fa-sync-alt"></i> Data last updated: {{ last_update.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        {% else %}
-        <p><i class="fas fa-exclamation-triangle"></i> Update time information unavailable</p>
-        {% endif %}
-    </div>
-
     <!-- Recommended location section -->
     {% if best_loket %}
     <div class="bento">
-        <div class="best-loket">
+        <div class="best-loket loket-card" data-loket="{{ best_loket[1] }}">
             <h2><i class="fas fa-star"></i> {{ translations[lang]['card_recommended_location'] }}</h2>
             <p><i class="fas fa-building"></i> {{ best_loket[1] }}</p>
             <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ best_loket[2] }} minutes</p>
@@ -196,7 +187,7 @@
     <!-- Location data grid -->
     <div class="bento">
         {% for loket in loket_data %}
-        <div>
+        <div class="loket-card" data-loket="{{ loket[1] }}">
             <h3><i class="fas fa-building"></i> {{ loket[1] }}</h3>
             <p><i class="fas fa-clock"></i> {{ translations[lang]['card_current_wait'] }}: {{ loket[2] }} minutes</p>
             <p><i class="fas fa-users"></i> {{ translations[lang]['card_currently_waiting'] }}: {{ loket[3] }} people</p>
@@ -205,7 +196,7 @@
     </div>
     
     <!-- Seasonality chart section -->
-    <div class="chart-container">
+    <div id="wait-patterns" class="chart-container">
         <h2>{{ translations[lang]['plot_title'] }}</h2>
         <p>{{ translations[lang]['plot_subtitle'] }}</p>
         
@@ -215,6 +206,14 @@
             <button class="day-button" data-day="3">{{ translations[lang]['day_wednesday'] }}</button>
             <button class="day-button" data-day="4">{{ translations[lang]['day_thursday'] }}</button>
             <button class="day-button" data-day="5">{{ translations[lang]['day_friday'] }}</button>
+        </div>
+
+        <!-- Loket selector -->
+        <div class="loket-selector">
+            <button class="loket-button active" data-loket="all">{{ translations[lang]['all_locations'] }}</button>
+            {% for loket in loket_data %}
+            <button class="loket-button" data-loket="{{ loket[1] }}">{{ loket[1] }}</button>
+            {% endfor %}
         </div>
         
         <div class="opening-hours-note" id="opening-hours-note"></div>
@@ -276,7 +275,8 @@
     <script>
         // Chart instance variable
         let waitTimeChart = null;
-        
+        let activeLoketFilter = 'all'; // Central state for the current filter
+
         // Current day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
         const currentDate = new Date();
         let currentDay = currentDate.getDay();
@@ -298,9 +298,56 @@
         ];
         
         /**
+         * Central function to update chart and UI based on a filter.
+         * @param {string} targetLoket - The name of the loket to show, or 'all'.
+         * @param {object} options - Additional options, e.g., { scroll: true }
+         */
+        function setLoketFilter(targetLoket, options = {}) {
+            activeLoketFilter = targetLoket;
+
+            // Update button active states
+            document.querySelectorAll('.loket-button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.loket === targetLoket);
+            });
+
+            // Update chart dataset visibility
+            if (waitTimeChart) {
+                waitTimeChart.data.datasets.forEach(ds => {
+                    ds.hidden = (targetLoket !== 'all' && ds.label !== targetLoket);
+                });
+                waitTimeChart.update();
+            }
+
+            // Scroll to chart if requested
+            if (options.scroll) {
+                const chartSection = document.getElementById('wait-patterns');
+                if (chartSection) {
+                    chartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+
+        /**
          * Initialize day selector and load initial chart data
          */
         document.addEventListener('DOMContentLoaded', function() {
+            // Cards, day buttons, and loket buttons are set up here.
+            
+            // Attach unified click handler to location cards
+            document.querySelectorAll('.loket-card').forEach(card => {
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', function() {
+                    setLoketFilter(this.dataset.loket, { scroll: true });
+                });
+            });
+            
+            // Attach unified click handler to loket filter buttons
+            document.querySelectorAll('.loket-button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    setLoketFilter(this.dataset.loket);
+                });
+            });
+
             const dayButtons = document.querySelectorAll('.day-button');
             
             // Set initial active button
@@ -463,6 +510,13 @@
                     plugins: {
                         legend: {
                             position: 'top',
+                            onClick: (e, legendItem, legend) => {
+                                // When a legend item is clicked, use our central filter function
+                                const clickedLoket = legendItem.text;
+                                // If the clicked item is already the active filter, show all. Otherwise, activate it.
+                                const newFilter = (activeLoketFilter === clickedLoket) ? 'all' : clickedLoket;
+                                setLoketFilter(newFilter);
+                            }
                         },
                         tooltip: {
                             mode: 'index',
@@ -502,6 +556,9 @@
                     }
                 }
             });
+
+            // Re-apply the active filter whenever the chart is redrawn (e.g., changing day)
+            setLoketFilter(activeLoketFilter);
         }
     </script>
 
