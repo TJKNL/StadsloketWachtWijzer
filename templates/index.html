@@ -123,30 +123,7 @@
         <!-- Cache control -->
         <meta http-equiv="Cache-Control" content="max-age=1800">
 
-        <!-- TCF API Integration -->
-        <script>
-        // TCF API handling function (simplified version)
-        function setupTCF() {
-            window.__tcfapi = function(command, version, callback) {
-                if (command === 'addEventListener') {
-                    const tcData = {
-                        gdprApplies: true,
-                        eventStatus: 'tcloaded',
-                        purpose: {consents: {}}
-                    };
-                    callback(tcData, true);
-                } else if (command === 'getTCData') {
-                    const tcData = {
-                        gdprApplies: true,
-                        eventStatus: 'tcloaded',
-                        purpose: {consents: {}}
-                    };
-                    callback(tcData, true);
-                }
-            };
-        }
-        setupTCF();
-        </script>
+        <!-- No local TCF stub: Google CMP will define __tcfapi itself -->
     </head>
 <body>
     <!-- Language switcher -->
