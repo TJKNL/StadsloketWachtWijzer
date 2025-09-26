@@ -14,6 +14,24 @@
           'wait_for_update': 500
       });
 
+      // Apply stored consent early if present
+      try {
+        const storedConsent = localStorage.getItem('ww_consent_v1');
+        if (storedConsent) {
+          const parsed = JSON.parse(storedConsent);
+          const analytics = parsed.analytics === true ? 'granted' : 'denied';
+          const ads = parsed.ads === true ? 'granted' : 'denied';
+          gtag('consent', 'update', {
+            'analytics_storage': analytics,
+            'ad_storage': ads,
+            'ad_user_data': ads,
+            'ad_personalization': ads,
+            'functionality_storage': 'granted',
+            'security_storage': 'granted'
+          });
+        }
+      } catch (e) {}
+
       gtag('js', new Date());
       gtag('config', 'G-4XECBEDSBR');
       /* AdSense Publisher ID */
@@ -136,6 +154,76 @@
             </section>
         </article>
     </div>
+
+    <!-- Consent Banner on privacy page as well -->
+    <div id="cookie-banner" class="cookie-bento" style="display:none; position: fixed; bottom: 16px; left: 16px; right: 16px; z-index: 9999;">
+        <h3>{{ translations[lang]['cookie_banner_title'] }}</h3>
+        <p>{{ translations[lang]['cookie_banner_text'] }} <a class="cookie-policy-link" href="{{ url_for('privacy') }}" target="_blank">{{ translations[lang]['cookie_more_info'] }}</a></p>
+        <div class="consent-choices">
+            <div class="consent-option">
+                <label>
+                    <input type="checkbox" id="opt-analytics" checked>
+                    {{ translations[lang]['cookie_analytics_option'] }}
+                </label>
+                <small>{{ translations[lang]['cookie_analytics_description'] }}</small>
+            </div>
+            <div class="consent-option">
+                <label>
+                    <input type="checkbox" id="opt-ads">
+                    {{ translations[lang]['cookie_ads_option'] }}
+                </label>
+                <small>{{ translations[lang]['cookie_ads_description'] }}</small>
+            </div>
+        </div>
+        <div class="cookie-buttons">
+            <button id="btn-accept-all" class="cookie-btn accept">{{ translations[lang]['cookie_accept_all'] }}</button>
+            <button id="btn-decline-all" class="cookie-btn decline">{{ translations[lang]['cookie_decline_all'] }}</button>
+            <button id="btn-save-choices" class="cookie-btn options">{{ translations[lang]['cookie_save_choices'] }}</button>
+        </div>
+    </div>
+
+    <script>
+      // Banner behavior
+      (function initConsentBanner(){
+        try {
+          const stored = localStorage.getItem('ww_consent_v1');
+          const banner = document.getElementById('cookie-banner');
+          if (!banner) return;
+          if (stored) {
+            banner.style.display = 'none';
+            return;
+          }
+          banner.style.display = 'block';
+
+          const chkAnalytics = document.getElementById('opt-analytics');
+          const chkAds = document.getElementById('opt-ads');
+          const btnAcceptAll = document.getElementById('btn-accept-all');
+          const btnDeclineAll = document.getElementById('btn-decline-all');
+          const btnSave = document.getElementById('btn-save-choices');
+
+          function applyConsent(analytics, ads) {
+            try {
+              localStorage.setItem('ww_consent_v1', JSON.stringify({ analytics, ads }));
+            } catch (e) {}
+            gtag('consent', 'update', {
+              'analytics_storage': analytics ? 'granted' : 'denied',
+              'ad_storage': ads ? 'granted' : 'denied',
+              'ad_user_data': ads ? 'granted' : 'denied',
+              'ad_personalization': ads ? 'granted' : 'denied',
+              'functionality_storage': 'granted',
+              'security_storage': 'granted'
+            });
+            banner.style.display = 'none';
+          }
+
+          btnAcceptAll?.addEventListener('click', function(){ applyConsent(true, true); });
+          btnDeclineAll?.addEventListener('click', function(){ applyConsent(false, false); });
+          btnSave?.addEventListener('click', function(){ applyConsent(!!chkAnalytics?.checked, !!chkAds?.checked); });
+        } catch (e) {
+          // Non-fatal
+        }
+      })();
+    </script>
 
     <footer class="footer">
         <p>© 2025 <a href="https://www.twankerkhof.nl" target="_blank">Twan Kerkhof</a> | {{ translations[lang]['footer_text'] }}</p>
